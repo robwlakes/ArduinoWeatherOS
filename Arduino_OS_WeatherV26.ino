@@ -63,6 +63,7 @@ DHT dht(DHTPIN, DHTTYPE);
 #define sDelay 230         //One Quarter Manchester Bit duration
 #define lDelay 460         //One Half Manchester Bit duration
 byte    headerHits=0;      //How many ones detected as a header bit
+byte    headerBits=15;     //How many '1's to detect before accepting it as a valid header
 boolean header    = false; //State of header detection
 boolean logic     = false; //State of the Manchester decoding
 byte    signal    = 0;     //state of RF
@@ -150,7 +151,7 @@ void loop(){
         headerHits ++; // Highly likely a "1" waveform, so count it in
         //Serial.print(headerHits);
         //Serial.print(" ");
-        if (headerHits == 20){ //if we can find 20 in a row we will assume it is a header
+        if (headerHits == headerBits){ //if we can find 15 1's in a row we will assume it is a header and wait for a Synch '0'
           header = true; //so we can exit this part, collect rest of header and begin data processing below
           headerHits=0; //reset, so ready to search for another header when next required, or should an error occur in this packet
           //Serial.println("");
@@ -209,9 +210,9 @@ void loop(){
         nosBits++;
         if (nosBits == 8){ //one byte created, so move onto the next one
           manchester[nosBytes] = dataByte; //store this byte
-          nosBits = 0;     //found 8, rezero and get another 8
+          nosBits = 0;     //found 8, so rezero and to get another 8
           dataByte = 0;    //hold the bits in this one
-          dataMask = 16;   //mask to do reversed nybbles on the fly
+          dataMask = 0x10;   //mask to do reversed nybbles on the fly
           nosBytes++;      //keep a track of how many bytes we have made
         }
       }
@@ -286,11 +287,11 @@ void loop(){
 void usbData(){
   // Stn Id, Packet Type, Wind Quadrant, Wind Speed, Rain Tips, Ext temp, Int Temp, Int Pressure, Int Humidity
   if (scan == 7){  //all readings now valid
-    Serial.print(activity); // 03210321 Hi-Nybble flags failed Sensor Checksums, Lo-Nybble flags good failed Sensor Checksums
+    Serial.print(activity); // 03210321 Hi-Nybble flags failed Sensor Checksums, Lo-Nybble flags good Sensor Checksums
     Serial.print(",");
     Serial.print(battery);  // 00332211 Indicator battery level for sensors 1,2,3 
     //Not sure what these bits mean, pretty sure so called battery bits are wrong, however an Indicator byte idea is an OK Idea
-    //When and if the bits that indicate battery levels are found thye can go in here :-)
+    //When and if the bits that indicate battery levels are found they can go in here :-)
     //I have a suspicion they may use bad checksums or some such to detect when the Tx is getting low.  However that idea has a
     //weakness as any other Tx on 433 can scramble a packet, and each WMR86 has three Tx's all transmitting at different intervals
     //and will inevitably cause corrupted/bad packets when they overlap. Hence I have been monitoring checksums as well.
