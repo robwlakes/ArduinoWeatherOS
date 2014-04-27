@@ -43,9 +43,13 @@ This is where the next bit of inside information is required, but it is fairly s
 Using our previous nomenclature -
      Tran  3/4  Mid   1/4
 hi   /     lo   -     hi    will mean a hi/lo transition expected (ie a 1 followed by a 1), loop (wait) for a hi/lo
+
 lo   /     hi   -     lo    will mean a lo/hi transition expected (ie a 0 followed by a 0), loop (wait) for a lo/hi
+
 hi   /     lo   -     lo    will mean a lo/lo transition expected (ie a 1 followed by a 0), loop (wait) for a lo/hi
+
 lo   /     hi   -     hi    will mean a hi/hi transition expected (ie a 0 followed by a 1), loop (wait) for a hi/lo
+
 
 
 The synchronising bit and may or maynot be included in the byte boundaries.  Some implementations send a single 0 then all the bytes of information, whereas the OS example we are dealing with here just makes sure the first bit in the first byte sent, is always a 0.
