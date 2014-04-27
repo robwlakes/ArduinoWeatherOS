@@ -41,6 +41,7 @@ This is where the next bit of inside information is required, but it is fairly s
 
 
 Using our previous nomenclature -
+
      Tran  3/4  Mid   1/4
 hi   /     lo   -     hi    will mean a hi/lo transition expected (ie a 1 followed by a 1), loop (wait) for a hi/lo
 
