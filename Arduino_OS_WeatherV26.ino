@@ -62,8 +62,8 @@ DHT dht(DHTPIN, DHTTYPE);
 #define ledPin 13          //Human feedback
 #define sDelay 230         //One Quarter Manchester Bit duration
 #define lDelay 460         //One Half Manchester Bit duration
-byte    headerHits=0;      //How many ones detected as a header bit
-byte    headerBits=15;     //How many '1's to detect before accepting it as a valid header
+byte    headerHits= 0;     //How many ones detected as a header bit
+byte    headerBits= 10;    //How many '1's to detect before accepting it as a valid header
 boolean header    = false; //State of header detection
 boolean logic     = false; //State of the Manchester decoding
 byte    signal    = 0;     //state of RF
@@ -83,12 +83,12 @@ double  gustWindspeed = 0.0; //now used for general anemometer readings rather t
 float  rainTotal = 0.0;
 float  rainRate  = 0.0;
 double  temperature = 0.0;
-int     humidity  = 0;
+int     humidity = 0;
 double  intTemp;
 double  intHumi;
 double  intPres;
-int     scan=0; //On start up lower three bits used to show data from all sensors has been received before pooling and sending out data
-byte    activity=0;//6 Bits, Flags whether good or bad checksum for a given sensor received in last minute 
+int     scan     = 0; //On start up lower three bits used to show data from all sensors has been received before pooling and sending out data
+byte    activity = 0;//6 Bits, Flags whether good or bad checksum for a given sensor received in last minute 
 int     seconds;
 const char windDir[16][4] = {  
   "N  ", "NNE", "NE ", "ENE",  "E  ", "ESE", "SE ", "SSE",  "S  ", "SSW", "SW ", "WSW",  "W  ", "WNW", "NW ", "NNW"};
