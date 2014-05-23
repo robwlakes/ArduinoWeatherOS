@@ -55,4 +55,24 @@ lo   /     hi   -     hi    will mean a hi/hi transition expected (ie a 0 follow
 
 The synchronising 0 bit and may or may not be included in the byte boundaries.  Some implementations send a single 0 then all the bytes of information, whereas the OS example we are dealing with here just makes sure the first bit in the first byte sent, is always a 0.
 
+Once this "0" is detected then the data stream can be considered synchronised with the detector.  The program to decode the Oregon Scientific Weather Station's sensors then transmit a sequence of bytes that have data encoded in both straight binary and othertimes BCD.  The number of bytes for each transmitter can also vary.  If the program must be able to detect each transmitter and change the number of bytes expected for each type.  The program begins downloading bytes (more on that later) and used the ID bytes within the first 2 bytes and when a particular sensor is detected it immediately sets the number of bytes expected.  So temp/Humidity decoding requires 10 bytes (but only uses 9), Anemometer decoding requires 10 bytes and uses them all, and the Rainfall sensor decoding requires 11 bytes but only needs the four most significant bits of the last byte.   If 11 bytes were accepted all the time, the Rainfall would work, but the other two would fail as their signals return to random noise after 10 bytes and this would cause them to tbe rejected.
+
+Once a data packet is received it is given a checksum check before being declared valid.  We now need to diverge, and return back to the way the bits arive in the data stream and how they are best stored.  The easiest way to explain this is to give an example.  Let's number the raw Rf incoming bits in order, zero arrives first -
+
+0 1 2 3 4 5 6 7 , and this how it is best to rearrange those bits
+3 2 1 0 7 6 5 4 , so the first bit 0 is actually moved to the fourth position, the next bit is moved to the fifth position and so on and this wraps around, so all the incoming bits are stored in new postions in the stored byte array.
+
+Why Oregon Scientific chose this rearrangement is best left up to them, but applying this swapping of positions makes all the data in the stored bytes array so much more logical as well. Binary numbers are found in the correct ascending order etc.  Plus when it comes to the Checksum, it is also simple to execute as well.  Take each 4 bit nybble in the data packet (excluding the checksum byte) and add them up as an 8 bit result.  This will result in a byte that be compared to the last byte in the packet, the checksum byte.  The number of nybbles for  Temp/Humidity is 16, Anemometer 18, and rainfall 19 (NB rainfall Check Sum byte, is made up of nybble 20 and 21, ie it bridges the byte boundary).
+
+Once the bits and bytes are stored in this fashion then the checksum becomes trivial, just add up the nybbles and compare to the checksum byte. Reject any packet that does not work.  A simple checksum like this is prone t substitution erros getting through undetected (ie one byte has an error bit, but is balanced out by an inverted error bit in another byte.  Cyclic reduncancy methods for checking data validity are much more robust than the simple aithmetic checksum but they are not used on the OS Sensors. However by the time the two bytes for the sensor type ID, and the rolling ID code for a particular sensor are put aside, the critical data that changes is down to  5-7 bytes, and probably the checksum for such a small sample is quite acceptable (though if you intend to use any of these sensors for mission critical stuff you may like to disagree on that opinion).  Fortunately for me it was easy to work out.
+
+Once the bytes for a particular packet are stored in the array, they are processed.  Some have conversion factors applied eg the Anemometer wind speed is converted from metres per second to kilometers per hour.  Others such as relative Humidity are provided directly in two BCD characters.  Eventually a selection of the data is formatted into ASCII values in a CSV string and sent out via the serial port (over the USB connection).  My Python program on the www server then further processes this string in to averages and graphs etc
+
+Before any CSV is sent though, the program checks that it has received a valid sample from each of the three sensors, and  only begins sending CSV's when Therm/Hum, Anemometer and Rainfall have all been logged in for valid values. This avoids some values being valid and other being at zero.
+
+This description should give you a good idea of how the OS V3.0 protocol works and how my program tackles decoding that protocol.  It is not very sophisticated when it is all shown now, but was quite a headache to work through originally.  The OS Sensors are a good balance of quality engineering, accessible protocols and reasonable price.
+
+I hope you enjy using them as I do, cheers, Rob
+
+
 To be continued...........
