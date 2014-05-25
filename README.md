@@ -31,17 +31,17 @@ Here we need to digress to RF practicalities...
 
 Part of the practical application of the Manchester protocol combined with simple 433MHz Tx/Rx combo's is use a header sequence of bits, usually 30 or so 1's.  This stablizes the Rx AGC and establishes the Bias Detection point so the simple 433Mhz Rx has a good chance of settling down and producing a clean logic waveform after say 10 on/off transmissions.  The decoding program can then sample the Bit Waveform by synchronising (ie looping and waiting) the algorithm to the on/off transition, which is the midway point of a Bit Waveform for a 1.  This is how it works for the OS protocol, as this is its polarity, hi/lo=1, lo/hi=0 (see above).
 
-![alt text](AGC_Starting.png?raw=true "Rx AGC kicking in") Graphic 1: The AGC is stabilising fairly quickly here.
+![alt text](images/AGC_Starting.png?raw=true "Rx AGC kicking in") Graphic 1: The AGC is stabilising fairly quickly here.
 
 This Graphic 1 below is showing a stream on 1's as the header.  Now the algorithm is expecting a stream of Data 1's and to begin with, and looking for any hi to lo transition on the Rx and assuming it is the middle of a Data 1 bit Waveform.  After detecting a hi/lo transition it begins to check the waveform. 
 
-![alt text](header.png?raw=true "Header Manchester Encoding") Diag 1
+![alt text](images/header.png?raw=true "Header Manchester Encoding") Diag 1
 
 So section A represents random noise on the RX.  Section B represents the AGC kicking in and at the start of C section the first hi to lo transition is found that has a regular Bit Waveform following it, such that during section C the processor has counted the minimum 15 properly formed data Bit Waveforms and arriving in the right frequency, such that by the end of the C section, it is declared a valid header.  The section D could be shorter or longer, any excess are simply "soaked up", but importantly at this stage the program has swapped over and is assuming it is synched to a valid stream of ones, and when section E arrives it can detect it as a zero, the synch bit, and then goes off to further decode the packet of data beginning in section F and could go on for example 80 or more bits of data bits of zeroes or ones.
 
 How does it know it is properly formed and timed Bit Waveforms?  Please refer to diagram 2. To filter out noise, the input is sampled until a hi-lo eg at (B)  and again algorithm resamples the Rx output about a 1/4 of a Bit Waveform later at (E), to see if it is still lo.  If is lo then it was possibly a genuine middle of a 1 Bit Waveform, however if it is not a lo then it was not a genuine hi/lo middle of a 1 Bit Waveform, and the algorithm begins the search for a hi/lo transition to begin all over again.  However if this preliminary test is true, it has possibly sampled a midpoint of a 1, so it waits for another half a Bit Waveform (F).  This timing is actually 1/4 of the way into the next Bit Waveform, and because we know we are looking for another 1, then the signal should have gone hi by then. If is not hi, then the original sample, that was possibly the mid point of a 1 Bit Waveform is rejected, as overall, it has not followed the 'Bit Waveform rules', and the search (looping) for then next hi/lo transition begins at the start, all over again. Here is a diagram to highlight the previous ideas.
 
-![alt text](manchester.png?raw=true "Manchester Encoding of data bits") Diag 2
+![alt text](images/manchester.png?raw=true "Manchester Encoding of data bits") Diag 2
 
 The pink lines are the signal arriving from the 433MHzRx. The long vertical blue lines (eg at A & C) are indicating the start and end of each Bit Waveform.  These are partially covered by the pink signal trace if they coincide.  This diagram show 7 bit patterns. B is positioned at th emiddle of a Bit Waveform, and these are also indicated by the M's.  The data contained in each bit pattern is determined by the direction of the transition at M, the middle of the Bit Waveform and not by what happens at the finish and start of each Bit Waveform.
 
