@@ -47,15 +47,15 @@ Using our previous nomenclature (plus E/S is the End of one Bit Waveform, and th
 
 ` Sampled                   | Predicted`
 
-`T1  Mid    T2   E/S    T3  | Mid   T4   `How the value at T4 can be predicted by sampling at time marks in Bit Waveform
+` T1  Mid    T2   E/S    T3  | Mid   T4   `How the value at T4 can be predicted by sampling at time marks in Bit Waveform
 
-`hi   v     lo    ^     hi  |  v    lo   `a hi/lo Mid transition expected (ie a 1 followed by a 1), so loop (wait) for a hi/lo 
+` hi   v     lo    ^     hi  |  v    lo   `a hi/lo Mid transition expected (ie a 1 followed by a 1), so loop (wait) for a hi/lo 
 
-`lo   ^     hi    v     lo  |  ^    hi   `a lo/hi Mid transition expected (ie a 0 followed by a 0), so loop (wait) for a lo/hi
+` lo   ^     hi    v     lo  |  ^    hi   `a lo/hi Mid transition expected (ie a 0 followed by a 0), so loop (wait) for a lo/hi
 
-`hi   v     lo    -     lo  |  ^    hi   `a lo/lo Mid transition expected (ie a 1 followed by a 0), loop (wait) for a lo/hi
+` hi   v     lo    -     lo  |  ^    hi   `a lo/lo Mid transition expected (ie a 1 followed by a 0), loop (wait) for a lo/hi
 
-`lo   ^     hi    -     hi  |  v    lo   `a hi/hi Mid transition expected (ie a 0 followed by a 1), loop (wait) for a hi/lo
+` lo   ^     hi    -     hi  |  v    lo   `a hi/hi Mid transition expected (ie a 0 followed by a 1), loop (wait) for a hi/lo
 
 ` Bit Waveform 1  |  Bit Waveform 2`
          
