@@ -43,7 +43,9 @@ How does it know it is properly formed and timed Bit Waveforms?  To filter out n
 
 ![alt text](manchester.png?raw=true "Manchester Encoding of data bits") Diag 2
 
-The pink lines are the signal arriving from the 433MHzRx. The long vertical blue lines (eg at A & C) are indicating the start and end of each Bit Waveform.  These are partially covered by the pink signal trace if they coincide.  This diagram show 7 bit patterns. B is positioned at th emiddle of a Bit Waveform, and these are also indicated by the M's.  The data contained in each bit pattern is determined by the direction of the transition at M, the middle of the Bit Waveform and not by what happens at the finish and start of each Bit Waveform.  
+The pink lines are the signal arriving from the 433MHzRx. The long vertical blue lines (eg at A & C) are indicating the start and end of each Bit Waveform.  These are partially covered by the pink signal trace if they coincide.  This diagram show 7 bit patterns. B is positioned at th emiddle of a Bit Waveform, and these are also indicated by the M's.  The data contained in each bit pattern is determined by the direction of the transition at M, the middle of the Bit Waveform and not by what happens at the finish and start of each Bit Waveform.
+
+The Diagram 2 shows the four possible bit sequences, 0->1, 1->0, 1->1, 0->0 and what happens inbteedn each combinations of Bit Waveforms.
 
 This simple filtering allows the program to detect and count the number of successfully detected Data 1's received, and once a minimum has been counted in sequence, then the program can assume it has a valid header coming in. This sampling, by looking for transitions and waiting periods of time to sample, is also applied equally to all subsequent 1's and 0's received and can eliminate badly formed packets if the waveform pattern of the Manchester encoding is not followed.  Hence it forms a simple but effective digital filter that greatly reduces spurious results from random or unwanted 433MHz signals. 
 
