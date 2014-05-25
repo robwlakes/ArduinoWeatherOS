@@ -31,7 +31,7 @@ Here we need to digress to RF practicalities...
 
 Part of the practical application of the Manchester protocol combined with simple 433MHz Tx/Rx combo's is use a header sequence of bits, usually 30 or so 1's.  This stablizes the Rx AGC and establishes the Bias Detection point so the simple 433Mhz Rx has a good chance of settling down and producing a clean logic waveform after say 10 on/off transmissions.  The decoding program can then sample the Bit Waveform by synchronising (ie looping and waiting) the algorithm to the on/off transition, which is the midway point of a Bit Waveform for a 1.  This is how it works for the OS protocol, as this is its polarity, hi/lo=1, lo/hi=0 (see above).
 
-![alt text](AGC_Starting.png?raw=true "Rx AGC kicking in")(AGC_Starting.png)
+![alt text](AGC_Starting.png?raw=true "Rx AGC kicking in")The AGC is stabilising fairly quickly here.
 
 The algorithm is expecting a stream of Data 1's and to begin with, and looking for any hi/lo transition on the Rx as the middle of a Data 1 bit Waveform.  After detecting a hi/lo transition it begins to check the waveform. To filter out noise, the algorithm resamples the Rx output about a 1/4 of a Bit Waveform later, to see if it is still lo.  If is lo then it was possibly a genuine middle of a 1 Bit Waveform, however if it is not a lo then it was not a genuine hi/lo middle of a 1 Bit Waveform, and the algorithm begins the search for a hi/lo transition all over again.  However if this preliminary test is true, it has possibly sampled a midpoint of a 1, so it waits for another half a Bit Waveform.  This timing is actually 1/4 of the way into the next Bit Waveform, and because we know we are looking for another 1, then the signal should have gone hi by then. If is not hi, then the original sample, that was possibly the mid point of a 1 Bit Waveform is rejected, as overall, it has not followed the 'rules', and the search (looping) for then next hi/lo transition begins at the start, all over again.
 
@@ -39,19 +39,21 @@ This simple filtering allows the program to detect and count the number of succe
 
 Okay so we can detect a header... Let's say the Tx sends a header of 30 Data 1's, and it takes 5 Data ones to stabilise the Rx, then we have 25 left to detect.  If the program locks in and begins receiving the Data 1's and counts to the minimum require for a header, such as 15, then where will be 10 Data 1's more to go.  However we cannot be sure how many Data 1's it will take to stabilise the Rx, it maybe 5 some days, maybe 7 or 3 other days, so we need a marker to indicate the header has finished and the data or payload is beginning.
 
-This is where the next bit of inside information is required, but this practice is fairly standard.  As any excess header Data 1 bits are being soaked up, the program is now looking for the header Data 1's to stop and a Data 0 to be detected. This 0 indicates that the data payload is about to begin.  The rules for interpretting the hi and lo's change slightly here.  As we know that we are dealing with a valid header, and we have a series of Data 1's detected, then the program is definitely synched to the mid-point of the Bit Waveform and can decode both Data 1 and 0's by continuing to sample at 3/4 time, and 1/4 time into the next Bit Waveform, to check the integrity of the waveform against the Manchester protocol, but also more importantly can now predict what the next transition will be, and when satisfied with the filtering/sampling results (which continues for every bit received) accumulate the data payload bits into into bytes.
-```
-Using our previous nomenclature-
+This is where the next bit of inside information is required, but this practice is fairly standard.  As any excess header Data 1 bits are being soaked up, the program is now looking for the header Data 1's to stop and a Data 0 to be detected. This 0 indicates that the data payload is about to begin.  The rules for interpretting the hi and lo's change slightly here.  As we know that we are dealing with a valid header, and we have a series of Data 1's detected, then the program is definitely synched to the Mid-point of the Bit Waveform.
 
-   Tran    3/4  Mid   1/4
-hi   /     lo   -     hi    will mean a hi/lo transition expected (ie a 1 followed by a 1), loop (wait) for a hi/lo
+We can subsequently decode both Data 1 and 0's by continuing to sample at 3/4 time (Mid+1/4 or T2 below), and across into 1/4 time (Mid+1/4+1/2 or T3 below) of the next Bit Waveform, to check the integrity of the waveform against the Manchester protocol, but also more importantly we can now predict what the next transition should be, synch to it, and when satisfied with the filtering/sampling results (which continues for every bit received) accumulate the data payload bits into into bytes.
 
-lo   /     hi   -     lo    will mean a lo/hi transition expected (ie a 0 followed by a 0), loop (wait) for a lo/hi
+Using our previous nomenclature (plus E/S is the End of one Bit Waveform, and the Start of the next Bit Waveform)-
 
-hi   /     lo   -     lo    will mean a lo/lo transition expected (ie a 1 followed by a 0), loop (wait) for a lo/hi
-
-lo   /     hi   -     hi    will mean a hi/hi transition expected (ie a 0 followed by a 1), loop (wait) for a hi/lo
-```
+` Sampled                   | Predicted`
+`T1  Mid    T2   E/S    T3  | Mid   T4   `How the value at T4 can be predicted by sampling at time marks in Bit Waveform
+`hi   v     lo    ^     hi  |  v    lo   `a hi/lo Mid transition expected (ie a 1 followed by a 1), so loop (wait) for a hi/lo 
+`lo   ^     hi    v     lo  |  ^    hi   `a lo/hi Mid transition expected (ie a 0 followed by a 0), so loop (wait) for a lo/hi
+`hi   v     lo    -     lo  |  ^    hi   `a lo/lo Mid transition expected (ie a 1 followed by a 0), loop (wait) for a lo/hi
+`lo   ^     hi    -     hi  |  v    lo   `a hi/hi Mid transition expected (ie a 0 followed by a 1), loop (wait) for a hi/lo
+` Bit Waveform 1  |  Bit Waveform 2`
+         
+The transitions at E/S are do not carry data, but if they occur they are to make sure the subsequent transitions that must occur at the Mid points match the bit stream correctly (you can think of E/S setting up the data transition for the next Mid). The critical aspect of this processing is that it is always synching to the Mid point of the Bit Waveform, where the critical data indicating transitions occur.  This makes the decoding of the bit stream very tolerant any errors in sampling the waveforms. This allows the calculations between receiving bits to take different lengths of time and still not effect the reliablity. The delays can be altered plus or minus 15% (or more) and still get reliable reception. 
 
 
 The synchronising 0 bit and may or may not be included in the byte boundaries.  Some implementations send a single 0 bit then all the bytes of information, whereas the OS example we are dealing with here just makes sure the first bit in the first byte sent, is always a 0.
