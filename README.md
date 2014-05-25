@@ -46,11 +46,17 @@ We can subsequently decode both Data 1 and 0's by continuing to sample at 3/4 ti
 Using our previous nomenclature (plus E/S is the End of one Bit Waveform, and the Start of the next Bit Waveform)-
 
 ` Sampled                   | Predicted`
+
 `T1  Mid    T2   E/S    T3  | Mid   T4   `How the value at T4 can be predicted by sampling at time marks in Bit Waveform
+
 `hi   v     lo    ^     hi  |  v    lo   `a hi/lo Mid transition expected (ie a 1 followed by a 1), so loop (wait) for a hi/lo 
+
 `lo   ^     hi    v     lo  |  ^    hi   `a lo/hi Mid transition expected (ie a 0 followed by a 0), so loop (wait) for a lo/hi
+
 `hi   v     lo    -     lo  |  ^    hi   `a lo/lo Mid transition expected (ie a 1 followed by a 0), loop (wait) for a lo/hi
+
 `lo   ^     hi    -     hi  |  v    lo   `a hi/hi Mid transition expected (ie a 0 followed by a 1), loop (wait) for a hi/lo
+
 ` Bit Waveform 1  |  Bit Waveform 2`
          
 The transitions at E/S are do not carry data, but if they occur they are to make sure the subsequent transitions that must occur at the Mid points match the bit stream correctly (you can think of E/S setting up the data transition for the next Mid). The critical aspect of this processing is that it is always synching to the Mid point of the Bit Waveform, where the critical data indicating transitions occur.  This makes the decoding of the bit stream very tolerant any errors in sampling the waveforms. This allows the calculations between receiving bits to take different lengths of time and still not effect the reliablity. The delays can be altered plus or minus 15% (or more) and still get reliable reception. 
