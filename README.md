@@ -31,7 +31,7 @@ Here we need to digress to RF practicalities...
 
 Part of the practical application of the Manchester protocol combined with simple 433MHz Tx/Rx combo's is use a header sequence of bits, usually 30 or so 1's.  This stablizes the Rx AGC and establishes the Bias Detection point so the simple 433Mhz Rx has a good chance of settling down and producing a clean logic waveform after say 10 on/off transmissions.  The decoding program can then sample the Bit Waveform by synchronising (ie looping and waiting) the algorithm to the on/off transition, which is the midway point of a Bit Waveform for a 1.  This is how it works for the OS protocol, as this is its polarity, hi/lo=1, lo/hi=0 (see above).
 
-![alt text](AGC_Starting.png ?raw=true "Rx AGC kicking in")(AGC_Starting.png)
+![alt text](AGC_Starting.png?raw=true "Rx AGC kicking in")(AGC_Starting.png)
 
 The algorithm is expecting a stream of Data 1's and to begin with, and looking for any hi/lo transition on the Rx as the middle of a Data 1 bit Waveform.  After detecting a hi/lo transition it begins to check the waveform. To filter out noise, the algorithm resamples the Rx output about a 1/4 of a Bit Waveform later, to see if it is still lo.  If is lo then it was possibly a genuine middle of a 1 Bit Waveform, however if it is not a lo then it was not a genuine hi/lo middle of a 1 Bit Waveform, and the algorithm begins the search for a hi/lo transition all over again.  However if this preliminary test is true, it has possibly sampled a midpoint of a 1, so it waits for another half a Bit Waveform.  This timing is actually 1/4 of the way into the next Bit Waveform, and because we know we are looking for another 1, then the signal should have gone hi by then. If is not hi, then the original sample, that was possibly the mid point of a 1 Bit Waveform is rejected, as overall, it has not followed the 'rules', and the search (looping) for then next hi/lo transition begins at the start, all over again.
 
@@ -43,7 +43,7 @@ This is where the next bit of inside information is required, but this practice 
 ```
 Using our previous nomenclature-
 
-     Tran  3/4  Mid   1/4
+   Tran    3/4  Mid   1/4
 hi   /     lo   -     hi    will mean a hi/lo transition expected (ie a 1 followed by a 1), loop (wait) for a hi/lo
 
 lo   /     hi   -     lo    will mean a lo/hi transition expected (ie a 0 followed by a 0), loop (wait) for a lo/hi
@@ -60,8 +60,8 @@ Once this "0" is detected then the data stream can be considered synchronised wi
 
 Once a data packet is received it is given a checksum check before being declared valid.  We now need to diverge, and return back to the way the bits arive in the data stream and how they are best stored.  The easiest way to explain this is to give an example.  Let's number the raw Rf incoming bits in order, zero arrives first -
 
-0 1 2 3 4 5 6 7 , and this how it is best to rearrange those bits
-3 2 1 0 7 6 5 4 , so the first bit 0 is actually moved to the fourth position, the next bit is moved to the fifth position and so on and this wraps around, so all the incoming bits are stored in new postions in the stored byte array.
+`0 1 2 3 4 5 6 7` , and this how it is best to rearrange those bits
+`3 2 1 0 7 6 5 4` , so the first bit 0 is actually moved to the fourth position, the next bit is moved to the fifth position and so on and this wraps around, so all the incoming bits are stored in new postions in the stored byte array.
 
 Why Oregon Scientific chose this rearrangement is best left up to them to explain, but applying this swapping of positions makes all the data in the stored bytes array so much more logical as well. Binary numbers are found in the correct ascending order etc.  Plus when it comes to the Checksum, it is also simple to execute as well.  Take each 4 bit nybble in the data packet (excluding the checksum byte) and add them up as an 8 bit result.  This will result in a byte that can be compared to the last byte in the packet, the checksum byte.  The number of nybbles for  Temp/Humidity is 16, Anemometer 18, and rainfall 19 (NB rainfall Check Sum byte, is made up of nybble 20 and 21, ie it bridges the byte boundary).
 
