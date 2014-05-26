@@ -1,7 +1,7 @@
-Weather persons
+Weather Stations
 ================
 
-###Arduino Uno, 433MhzRx and OS WMR86 Weather Station
+###Arduino Uno, 433MhzRx and Oregon Scientific WMR86 Weather Station
 
 This project allows the 433MHz signals from an Oregon Scientific WMR86 weather station to be intercepted and decoded  into simple decimal values using an Arduino Uno. The values for Wind Direction, Wind Speed, Temperature, Humidity and Rainfall are then sent via the USB/Serial port on the Arduino to the host computer.  In my case I use a Python program to interpret this CSV formatted string of characters and plot the above parameters for display on my website http://www.laketyersbeach.net.au/weather.html
 
