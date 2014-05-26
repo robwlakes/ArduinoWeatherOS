@@ -79,12 +79,12 @@ Once the bytes for a particular valid packet are stored in the array, they are p
 
 Before any CSV is sent though, the program checks that it has received a valid sample from each of the three sensors, and  only begins sending CSV's when Therm/Hum, Anemometer and Rainfall have all been logged in for valid values. This avoids some values being valid and other being at zero at start up.
 
-This description should give you a good idea of how the OS V3.0 protocol works and how my program tackles decoding that protocol.  It is not very sophisticated, when it is all shown now, but was quite a headache to work through originally.  The OS Sensors are a good balance of quality engineering, accessible protocols and reasonable price.  Really getting a grip on the Manchester protocol was been a major hurdle, but now is well under control.  I am hoping my program and this presentation above will help others tackle this protocol in their own projects.
+This description should give you a good idea of how the OS V3.0 protocol works and how my program tackles decoding that protocol.  It is not very sophisticated, when it is all shown now, but was quite a headache to work through originally.  The Oregon Schientific Sensors are a good balance of quality engineering, accessible protocols and reasonable price.  Really getting a grip on the Manchester protocol was been a major hurdle, but now is well under control.  I am hoping my program and this presentation above will help others tackle this protocol in their own projects.
 
-![alt text](images/WMR86.JPG?raw=true "Oregon Scientific WMR86 Sensors") http://au.oregonscientific.com/  to get your own :-)
-
-
-I hope you enjoy using them as I do, cheers, Rob
+![alt text](images/WMR86.JPG?raw=true "Oregon Scientific WMR86 Sensors") http://au.oregonscientific.com/  WMR86 to get your own :-)
 
 
-May be continued...........
+I hope you enjoy using them as much as I do, cheers, Rob
+
+
+Acknowledgements: There are many people, and other publications, I have referenced that have assisted greatly in arriving at this solution and these are listed in the documentation of the program, and explanations given to where they are relevant.
