@@ -81,6 +81,9 @@ Before any CSV is sent though, the program checks that it has received a valid s
 
 This description should give you a good idea of how the OS V3.0 protocol works and how my program tackles decoding that protocol.  It is not very sophisticated, when it is all shown now, but was quite a headache to work through originally.  The OS Sensors are a good balance of quality engineering, accessible protocols and reasonable price.  Really getting a grip on the Manchester protocol was been a major hurdle, but now is well under control.  I am hoping my program and this presentation above will help others tackle this protocol in their own projects.
 
+![alt text](images/WMR86.JPG?raw=true "Oregon Scientific WMR86 Sensors") http://au.oregonscientific.com/  to get your own :-)
+
+
 I hope you enjoy using them as I do, cheers, Rob
 
 
