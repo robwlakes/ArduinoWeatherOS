@@ -15,7 +15,7 @@ The Manchester protocol is a bias neutral protocol where each bit is composed of
 
 The cheap 433MHz Rx's available have a simple Automatic Gain Control and Bias Detection built in. The AGC allows the sensitivity to be maximised with low signals, and adjusted back when a stronger 433MHz signal is received.  The Bias Detection allows the average of the output signal voltage to be sampled and applied to one half of a comparator, the other comparator input has the received signal.  With Manchester protocol the on/off ratio is equal, so the Bias Detection will be at voltage half way, consequently the transitions of the signal from on to off and back again, can produce very clean, symmetrical logic signals with simple circuitry. This Manchester decoding program relies on the timing of transitions, rather than the exact shape of the waveform (ie again it does not have to be a very clean square wave to work).
 
-In other words, the decoding program needs to be able to determine whether it has seen a 430uS 'no signal' followed by a 430uS 'on signal' and so has received a 0, OR has received a 430uS 'no signal" followed by a 430uS 'on signal' and so received a 1. 'on signal' makes the Rx output go 'hi' and 'no signal' makes the Rx output go 'lo'.
+In other words, the decoding program needs to be able to determine whether it has seen a 430uS 'no signal' followed by a 430uS 'on signal' and so has received a 0, OR has received a 430uS 'on signal" followed by a 430uS 'no signal' and so received a 1. 'on signal' makes the Rx output go 'hi' and 'no signal' makes the Rx output go 'lo'.
 
 ####How is this decoded?
 
