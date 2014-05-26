@@ -41,7 +41,6 @@ This Graphic 1 above is showing a stream on 1's as the header.  Now the algorith
 
 ![alt text](images/header.png?raw=true "Header Manchester Encoding") Diag 1
 
-So section A represents random noise on the Rx.  Some of this will produce hi->lo transitions, and will be eliminated as the waveform overall will not be a valid Bit Waveform. Section B represents where a signal is detected and the AGC is kicking in. At the start of C section the first hi to lo transition is found that has a regular Bit Waveform following it, such that during section C the processor can detect the minimum 15 properly formed and timed data Bit Waveforms, such that by the end of the C section, it can be declared a valid header.  The program can now safely swap over to decoding where it can detect both 1's and 0's Bit Waveforms. The section D can be shorter or longer, any excess 1's are simply "soaked up" while waiting for the next state, section E.  When section E arrives the program is ready to detect it as a zero, the sync bit, and it then repeats this many times to further decode the packet of data beginning in section F, and could go on for example 80 or more bits of data bits of zeros or ones.
 
 ####Extracting data from the bit stream
 
@@ -67,7 +66,7 @@ Once a data packet is received it is given a checksum check before being declare
 
 `0 1 2 3 4 5 6 7` , and this how it is best to rearrange those bits
 
-`3 2 1 0 7 6 5 4` , so the first bit 0 is actually moved to the fourth position, the next bit 1 is moved to the third position, and so on, and as this wraps around, all the incoming bits are stored in new positions in the stored bytes in an array.  It essentially reverses the place values inside each nybbles.  This properly reflects the environmental values sampled. 
+`3 2 1 0 7 6 5 4` , so the first bit 0 is actually moved to the fourth position, the next bit 1 is moved to the third position, and so on, and, as this wraps around, all the incoming bits are stored in new positions in a temporary byte, and then stacked into a byte array.  It essentially reverses the place values inside each nybble.  This properly reflects the environmental values sampled. 
 
 Why Oregon Scientific chose this rearrangement is best left up to them to explain, but applying this swapping of positions makes all the data in the stored bytes array so much more logical as well. Binary numbers are found in the correct ascending order etc.  Plus when it comes to the Checksum, it is also simpler to calculate as well.  Take each 4 bit nybble in the data packet (excluding the checksum byte) and add them up as an 8 bit result.  This will result in a byte that can be compared to the last byte in the packet, the checksum byte.  The number of nybbles for  Temp/Humidity is 16, Anemometer 18, and rainfall 19 (NB rainfall Check Sum byte, is made up of nybbles 20 and 21, ie it bridges the byte boundary).
 
