@@ -25,11 +25,13 @@ In other words, the decoding program needs to be able to determine whether it ha
 
 The first very important prior knowledge to have is which of the two polarity conventions for Manchester encoding this system uses.  Arguments are put forward for both possibilities as being correct, but either polarity works as good as the other and with a simple audio sampler, such as Audacity, is simple to work out.  The transition polarity used by OS is that a Data 1 is hi->lo and Data 0 is lo->hi.
 
-However any hi->lo transition could be either the middle of a Data 1 Bit Waveform and mean a 1 has been sent, or possibly just the hi->lo transition between two Bit Waveforms, and as such not indicate anything. Similarly any lo->hi could indicate the middle of a Data 0 Bit, or just a meaningless transition between two Bit Waveforms.
+However any hi->lo transition could be either the middle of a Data 1 Bit Waveform and mean a 1 has been sent, or possibly just the hi->lo transition between two Bit Waveforms, and as such not indicate anything. Similarly any lo->hi could indicate the middle of a Data 0 Bit, or just a meaningless transition between two Bit Waveforms.  The following diagram illustrates the two Bit Waveforms.  When these are connected up into a bit stream, then the red dots may or may not require transitions to connect them for the Bit Waveforms to reflect the data bits.  A simple example is provided underneath with the 4 possible bit sequences (01,00,01,11) shown and the incidental transitions marked in blue. If you are writing a Manchester Encoded transmitter then this is all you need to know to get started.
 
-Curiously a long string of Data 1's will have the same looking waveform as a long string of Data 0's.  Whether they are 1's or 0's depends on where we begin to analyse, we would need some sort of marker, or unambiguous beginning point.  And also surprising to begin with is the sequences of data bits 1 to 0, and 0 to 1, do not have any signal change between Bit Waveforms. More information on that later...
+![alt text](images/bitwaveform.png?raw=true "Manchester Encoding Bit Waveform") Diag 1
 
-Critically the only guaranteed meaningful regular transition of states occurs in the middle of the Bit Waveform.  Consequently is essential to concentrate the decoding algorithm around the center of the Bit Waveform.
+Curiously a long string of Data 1's will have the same looking waveform as a long string of Data 0's.  Whether they are 1's or 0's depends on where we begin to analyse, we would need some sort of marker, or unambiguous beginning point.  And also surprising to begin with, is the sequences of data bits 1 to 0, and 0 to 1, do not have any signal change between Bit Waveforms. More information on that later...
+
+Critically the only guaranteed meaningful regular transition of states occurs in the middle of the Bit Waveform.  Consequently is essential to concentrate the decoding algorithm around the center of the Bit Waveform to keep it properly synced.
 
 ####RF practicalities... 
 
@@ -39,18 +41,18 @@ Part of the practical application of the Manchester protocol combined with simpl
 
 This Graphic 1 above is showing a stream on 1's as the header.  Now the algorithm is expecting a stream of Data 1's and to begin with, and looking for any hi to lo transition on the Rx and assuming it is the middle of a Data 1 bit Waveform.  After detecting any hi->lo transition it begins to check the subsequent waveform. 
 
-![alt text](images/header.png?raw=true "Header Manchester Encoding") Diag 1
+![alt text](images/header.png?raw=true "Header Manchester Encoding") Diag 2
 
 
 ####Extracting data from the bit stream
 
-How does it know they are properly formed and timed Bit Waveforms?  (Please refer to diagram 2 below, NB 7 Bit Waveforms are shown, only four are labelled). To filter out noise, the input is sampled until a hi->lo event is detected eg at (B) and then again the program re-samples the Rx output about a 1/4 of a Bit Waveform later at (E), to see if it is still lo.  If is lo (as the diagram shows) then it is possibly a genuine middle of a 1 Bit Waveform, however if it is not a lo then it was not a genuine hi->lo middle of a 1 Bit Waveform, and the algorithm begins the search for another hi->lo transition all over again.  However if this preliminary test is true, it has possibly sampled a midpoint of a 1, so it waits for another half a Bit Waveform (F).  This timing is actually 1/4 of the way into the next Bit Waveform, and because we know we are looking for another 1, then the signal should have gone hi by then. If is not hi, then the original sample, that was possibly the mid point of a 1 Bit Waveform is rejected, as overall, it has not followed the 'Bit Waveform rules', and the search (looping) for then next hi->lo transition begins at the start, all over again. Here is a diagram to highlight the previous ideas.
+How does it know they are properly formed and timed Bit Waveforms?  (Please refer to diagram 3 below, NB 7 Bit Waveforms are shown, only four are labelled). To filter out noise, the input is sampled until a hi->lo event is detected eg at (B) and then again the program re-samples the Rx output about a 1/4 of a Bit Waveform later at (E), to see if it is still lo.  If is lo (as the diagram shows) then it is possibly a genuine middle of a 1 Bit Waveform, however if it is not a lo then it was not a genuine hi->lo middle of a 1 Bit Waveform, and the algorithm begins the search for another hi->lo transition all over again.  However if this preliminary test is true, it has possibly sampled a midpoint of a 1, so it waits for another half a Bit Waveform (F).  This timing is actually 1/4 of the way into the next Bit Waveform, and because we know we are looking for another 1, then the signal should have gone hi by then. If is not hi, then the original sample, that was possibly the mid point of a 1 Bit Waveform is rejected, as overall, it has not followed the 'Bit Waveform rules', and the search (looping) for then next hi->lo transition begins at the start, all over again. Here is a diagram to highlight the previous ideas.
 
-![alt text](images/manchester.png?raw=true "Manchester Encoding of data bits") Diag 2
+![alt text](images/manchester.png?raw=true "Manchester Encoding of data bits") Diag 3
 
 The pink lines are the signal arriving from the 433MHzRx. The long vertical blue lines (eg at A & C) are indicating the start and end of some Bit Waveforms.  These are partially covered by the pink signal trace if they coincide.  This diagram show 7 bit patterns. B is positioned at the middle of a Bit Waveform, and these are also indicated by the M's.  The data contained in each bit pattern is determined by the direction of the transition at M, the middle of the Bit Waveform, and not by what happens at the finish and start of each Bit Waveform.
 
-The Diagram 2 shows the four possible bit sequences, 0->1, 1->0, 1->1, 0->0 and what happens in between each combinations of Bit Waveforms (marked by the orange #1-7 Bit Waveforms).
+The Diagram 3 shows the four possible bit sequences, 0->1, 1->0, 1->1, 0->0 and what happens in between each combinations of Bit Waveforms (marked by the orange #1-7 Bit Waveforms).
 
 This simple filtering (delay-check-delay-check etc) allows the program to detect and count the number of successfully detected Data 1's received, and once a minimum has been counted in sequence, then the program can assume it has a valid header coming in. This sampling, by looking for transitions and waiting periods of time to sample, is also applied equally to all subsequent 1's and 0's received and can eliminate badly formed packets if the waveform pattern of the Manchester encoding is not followed (say due to interference or a weak signal).  Hence it forms a simple but effective digital filter that greatly reduces spurious results from random or unwanted 433MHz signals. 
          
