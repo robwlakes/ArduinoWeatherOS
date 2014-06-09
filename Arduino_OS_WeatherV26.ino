@@ -385,7 +385,7 @@ byte nyb(int nybble){
 void rain(){
   rainTotal = float(((nyb(18)*100000)+(nyb(17)*10000)+(nyb(16)*1000)+(nyb(15)*100)+(nyb(14)*10)+nyb(13))*25/1000.0);
   //Serial.println((nyb(18)*100000)+(nyb(17)*10000)+(nyb(16)*1000)+(nyb(15)*100)+(nyb(14)*10)+nyb(13),DEC);
-  rainRate = float(((nyb(8)*10000)+(nyb(9)*1000)+(nyb(10)*100)+(nyb(11)*10)+nyb(12))*31.0/1000.0);
+  rainRate = float(((nyb(8)*10000)+(nyb(9)*1000)+(nyb(10)*100)+(nyb(11)*10)+nyb(12))*25.0/1000.0);
   //Serial.println((nyb(8)*10000)+(nyb(9)*1000)+(nyb(10)*100)+(nyb(11)*10)+nyb(12),DEC);
   battery  = (battery & B00111100)| (nyb(4)>>1);//lowest 2 bits in Indicator byte is for Rain bits (unproven conc?!?!)
 }
@@ -496,7 +496,7 @@ void binBank(){
 }
 
 void hexBank(){
-  //Print the fully aligned binary data, enable the headers if desired
+  //Print the fully aligned binary/hex data, enable the headers if desired
   //Serial.println("H 00 01 02 03 04 05 06 07 08 09");
   //Serial.println("  00 00 00 00 00 00 00 00 11 11");
   //Serial.println("B 10 32 54 76 98 BA DC FE 10 32");
