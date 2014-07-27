@@ -1,3 +1,6 @@
+General Manchester Debugger
+===========================
+
 Hi here are some rough notes for the moment ot accompany the Manchester Debug Program.
 
 Some things need to be changed and tested early, others much later.
