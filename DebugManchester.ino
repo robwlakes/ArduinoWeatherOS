@@ -10,8 +10,8 @@ int RxPin           = 8;   //The number of signal from the Rx
 int ledPin          = 13;  //The number of the onboard LED pin
 
 // Variables for Manchester Receiver Logic:
-word    sDelay     = 190;  //Small Delay about 1/4 of bit duration  begin with 320
-word    lDelay     = 490;  //Long Delay about 1/2 of bit duration  begin with 640, 1/4 + 1/2 = 3/4
+word    sDelay     = 245;  //Small Delay about 1/4 of bit duration  try like 250 to 500
+word    lDelay     = 490;  //Long Delay about 1/2 of bit duration  try like 500 to 1000, 1/4 + 1/2 = 3/4
 byte    polarity   = 1;    //0 for lo->hi==1 or 1 for hi->lo==1 for Polarity, sets tempBit at start
 byte    tempBit    = 1;    //Reflects the required transition polarity
 byte    discards   = 0;    //how many leading "bits" need to be dumped, usually just a zero if anything eg discards=1
