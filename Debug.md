@@ -62,14 +62,22 @@ Some Manchester protocols do not have a checksum, they merely quickly repeat the
 >  byte  manchester[4][20];   //Stores 4 banks of manchester pattern decoded on the fly
 
 So in a nutshell
-1. Experiment with number of byte at the end
-2. Get an idea of what sDelay and lDelay ought to be
-3. Get an idea of how many header bits you want to look for (10 is OK to begin with)
-3. Experiment with polarity setting
+
+>1. Experiment with number of byte at the end
+
+>2. Get an idea of what sDelay and lDelay ought to be
+
+>3. Get an idea of how many header bits you want to look for (10 is OK to begin with)
+
+>4. Experiment with polarity setting
+
 You should aim for steady reception at this stage... then
-4. See if packets are repeated for validation
-5. Experiment with how many bytes are used
-6. Work out whether the sync 0 is included in or excluded from the packet bytes
+
+>5. See if packets are repeated for validation
+
+>6. Experiment with how many bytes are used
+
+>7. Work out whether the sync 0 is included in or excluded from the packet bytes
 
 After all this you need to begin processing the data in the Manchester array to see if you can replicate the readings from your console.  You will need to keep the sync 0 problem in mind here.
 
