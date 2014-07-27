@@ -1,7 +1,7 @@
-General Manchester Debugger
-===========================
+General Manchester Debugger Ver8
+================================
 
-Hi here are some rough notes for the moment to accompany the Manchester Debug Program.
+Hi here are some rough notes for the moment to accompany the Manchester Debug Program Version 8.
 
 Only a few things need to be changed and tested early, others much later.
 
@@ -35,7 +35,7 @@ Your CRO will also give you an idea of how many header bits are part of the prot
 
 >  //Variables for Byte storage
 
->  boolean sync0In=true;      //Expecting sync0 to be inside byte boundaries, set to false for sync0 outside bytes (alter later)
+>  byte    discards    =0;      //Expecting all bits to be inside byte boundaries, set to number of leading bits to be dumped (alter later)
 
 You may need to set the variable sync0In as either true or false depending on how the byte boundaries line up.  You will need to be aware when trying to process the data that it maybe not alligned for the easiest processing if the sync zero is included in the first byte or excluded.
 
@@ -75,9 +75,9 @@ You should aim for steady reception at this stage... then
 
 >6. Experiment with how many bytes are used
 
->7. Work out whether the sync 0 is included in or excluded from the packet bytes
+>7. Work out whether all bits are included in, or some are excluded from, the packet bytes
 
-After all this you need to begin processing the data in the Manchester array to see if you can replicate the readings from your console.  You will need to keep the sync 0 problem in mind here (included or excluded?).
+After all this, you need to begin processing the data bytes in the Manchester array to see if you can replicate the readings from your console.  You will need to keep the discard bits problem in mind here (included or excluded?).
 
 To improve reliability of the reception you will also need to be able reject bad packets.  It will probably be by either repetition of packets or a single packet with a checksum (or a more complicated cyclic redundancy polynomial algorithm).  Manchester encoding does not have inherent error checking.  It is quite tolerant of timing varations, but any error checkingof the data must be added after the raw bytes have been received.  Good luck!
 
