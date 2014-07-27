@@ -11,13 +11,13 @@ Some things need to be changed and tested early, others much later.
 
 >  word    lDelay     = 390;  //Long Delay about 1/2 of bit duration  begin with 500, 1/4 + 1/2 = 3/4
 
-The above delays are cirtical to get right early on.  They do not need to be exact as the timing can be out by about +-15 and the encoding will tolerate it ok.  However a CRO, or something like Audacity used as  simple storage CRO, can get you into the right ball park much quicker.  This can also help you decide whether the polarity is positive or negative manchester.  Either are equally acceptable and it is just a matter of knowing what your system uses.  Again some sort of CRO is a help here.  Though there are only two possibilities so no problem trial and error here.
+The above delays are critical to get right early on.  They do not need to be very exact as the timing can be out by about +-15 and the encoding will tolerate it ok.  However a CRO, or something like Audacity used as  simple storage CRO, can get you into the right ball park much quicker.  This can also help you decide whether the polarity is positive or negative Manchester.  Either are equally acceptable and it is just a matter of knowing what your system uses.  Again some sort of CRO is a help here.  As there are only two possibilities, there is no problem with trial and error here.
 
 >  byte    polarity   = 1;    //0 for lo->hi==1 or 1 for hi->lo==1 for Polarity, sets tempBit at start
 
 >  byte    tempBit    = 1;    //Reflects the required transition polarity
 
-The variable tempBit follows the raw data coming in, but is exclusive-OR'ed with Polarity to invert it, if Neg Polarity is selected.
+The variable tempBit follows the raw data coming in, but is exclusive-OR'ed with Polarity to invert it (if Neg Polarity is selected) before being packed into the byte array.
 
 >  boolean firstZero  = false;//flags when the first '0' is found.
 
