@@ -10,12 +10,11 @@ int ledPin          = 13;  //The number of the onboard LED pin
 
 // Variables for Manchester Receiver Logic:
 word    sDelay     = 245;  //Small Delay about 1/4 of bit duration  begin with 320
-word    lDelay     = 390;  //Long Delay about 1/2 of bit duration  begin with 640, 1/4 + 1/2 = 3/4
+word    lDelay     = 380;  //Long Delay about 1/2 of bit duration  begin with 640, 1/4 + 1/2 = 3/4
 byte    polarity   = 1;    //0 for lo->hi==1 or 1 for hi->lo==1 for Polarity, sets tempBit at start
 byte    tempBit    = 1;    //Reflects the required transition polarity
-boolean firstData  = false;//Sets the detection of first zero after the header of 1's
 boolean firstZero  = false;//flags when the first '0' is found.
-boolean noErrors   =true;
+boolean noErrors   = true; //flags if signal does not follow Manchester conventions
 //variables for Header detection
 byte    headerBits = 10;   //The number of ones expected to make a valid header
 byte    headerHits = 0;    //Counts the number of "1"s to determine a header
@@ -105,8 +104,8 @@ void loop(){
         tempBit = tempBit^1;
       }//end of detecting no transition at end of bit waveform, ie end of previous bit waveform same as start of next bitwaveform
 
-      //Now process the tempBit state and make data definite 0 or 1's 
-      byte bitState = tempBit ^ polarity;//if polarity=1, invert the data or if polarity=0, leave it alone.
+      //Now process the tempBit state and make data definite 0 or 1's, allow possibility of Pos or Neg Polarity 
+      byte bitState = tempBit ^ polarity;//if polarity=1, invert the tempBit or if polarity=0, leave it alone.
       if(bitState==1){ //1 data could be header or packet
         if(!firstZero){
           headerHits++;
