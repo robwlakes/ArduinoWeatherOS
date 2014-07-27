@@ -10,7 +10,7 @@ int ledPin          = 13;  //The number of the onboard LED pin
 
 // Variables for Manchester Receiver Logic:
 word    sDelay     = 245;  //Small Delay about 1/4 of bit duration  begin with 320
-word    lDelay     = 380;  //Long Delay about 1/2 of bit duration  begin with 640, 1/4 + 1/2 = 3/4
+word    lDelay     = 490;  //Long Delay about 1/2 of bit duration  begin with 640, 1/4 + 1/2 = 3/4
 byte    polarity   = 1;    //0 for lo->hi==1 or 1 for hi->lo==1 for Polarity, sets tempBit at start
 byte    tempBit    = 1;    //Reflects the required transition polarity
 boolean firstZero  = false;//flags when the first '0' is found.
@@ -51,7 +51,7 @@ void setup() {
   pinMode(RxPin, INPUT);
   pinMode(ledPin, OUTPUT);
   Serial.println();
-  lDelay=2*sDelay;//just to make sure the 1:2 ratio is established
+  lDelay=2*sDelay;//just to make sure the 1:2 ratio is established. They can have some other ratio if required
   Serial.print("Using a delay of 1/4 bitWaveform ");// +-15% and they still seem to work ok, pretty tolerant!
   Serial.print(sDelay,DEC);
   Serial.print(" uSecs 1/2 bitWaveform ");//these may not be exactly 1:2 ratio as processing also contributes to these delays.
