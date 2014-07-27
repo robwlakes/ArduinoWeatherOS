@@ -85,11 +85,13 @@ This description should give you a good idea of how the OS V3.0 protocol works a
 
 ![alt text](images/WMR86.JPG?raw=true "Oregon Scientific WMR86 Sensors") http://au.oregonscientific.com/  WMR86 to get your own :-)
 
+####Manchester Debugger
+
+There is now a support Debug Program you can use to develop your own applications in this repository.  Edit three values, recipe like, and you could be receiving Manchester encoded bytes in next to no time. Then over to you! Check it out.
 
 I hope you enjoy using them as much as I do, cheers, Rob
 
 
 Acknowledgements: There are many people, and other publications, I have referenced that have assisted greatly in arriving at this solution and these are listed in the documentation of the program, and explanations given to where they are relevant.
 
-PS There is now a support Debug Program you can use to develop your own applications from now in this repository.  Edit three values, recipe like, and you could be receiving Manchester encoded bytes in next to no time. Then over to you!
-Check it out.
+
