@@ -1,5 +1,5 @@
 /* 
- Weather station reading by delay rather than interrupt
+ Manchester Encoding reading by delay rather than interrupt
  Rob Ward July 2014
  This example code is in the public domain.
  */
@@ -38,10 +38,10 @@ byte  manchester[4][20];   //Stores 4 banks of manchester pattern decoded on the
  10 bits required for a valid header
  Sync Zero inside Packet
  D 00 00001111 01 22223333 02 44445555 03 66667777 04 88889999 05 AAAABBBB 06 CCCCDDDD 07 EEEEFFFF 08 00001111 90 22223333
-D 5F 01011111 14 00010100 28 00101000 C5 11000101 01 00000001 //Oregon Scientific Temperature
-D 54 01010100 98 10011000 20 00100000 A0 10100000 00 00000000 //Oregon Scientific Rainfall
-D 58 01011000 91 10010001 20 00100000 52 01010010 13 00010011 //Oregon Scientific Anemometer/Wind direction
-These are just raw test dumps. The data has to be processed and require 10-11 bytes for all packet to be seen
+ D 5F 01011111 14 00010100 28 00101000 C5 11000101 01 00000001 //Oregon Scientific Temperature
+ D 54 01010100 98 10011000 20 00100000 A0 10100000 00 00000000 //Oregon Scientific Rainfall
+ D 58 01011000 91 10010001 20 00100000 52 01010010 13 00010011 //Oregon Scientific Anemometer/Wind direction
+These are just raw test dumps. The data has to be processed and require 10-11 bytes for all the packet to be seen
 Oregon Scientific works on nibbles and these need to reversed ie ABCD become DCBA in each nibble
 Also the OS protocol has a simple checksum to assist with validation as the packets are only sent once a cycle
  */
@@ -119,7 +119,7 @@ void loop(){
         }
       }//end of dealing with ones
       else{  //bitState==0 could first error, first zero or packet
-        // if it is header their must be no zeroes
+        // if it is header there must be no "zeroes" or errors
         if(headerHits<headerBits){
           //Still in header checking phase, more header hits required
           noErrors=false;//landing here means header is corrupted, so it is probably an error
@@ -157,7 +157,8 @@ void add(byte bitData){
     //Serial.print("B");
   }
   if(nosBytes==maxBytes){
-    hexBinDump();
+    hexBinDump();//for debug purposes dump out in hex and bainary
+    //analyseData();//later on develop your own analysis routines
   }
 }
 

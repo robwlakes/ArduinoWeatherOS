@@ -63,8 +63,6 @@ Some Manchester protocols do not have a checksum, they merely quickly repeat the
 
 So in a nutshell
 
->1. Experiment with number of byte at the end
-
 >2. Get an idea of what sDelay and lDelay ought to be
 
 >3. Get an idea of how many header bits you want to look for (10 is OK to begin with)
