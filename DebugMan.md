@@ -1,9 +1,9 @@
 General Manchester Debugger Ver8
 ================================
 
-Hi here are some rough notes for the moment to accompany the Manchester Debug Program Version 8.
+Hi, here are some rough notes for the moment to accompany the Manchester Debug Program Version 8.
 
-Only a few things need to be changed and tested early, others much later.
+Only a few things need to be changed and tested early, others much later. Pretty much an easy recipe...
 
 >  // Variables for Manchester Receiver Logic:
 
@@ -63,21 +63,25 @@ Some Manchester protocols do not have a checksum, they merely quickly repeat the
 
 So in a nutshell
 
->2. Get an idea of what sDelay and lDelay ought to be
+>1. Get an idea of what sDelay and lDelay ought to be
 
->3. Get an idea of how many header bits you want to look for (10 is OK to begin with)
+>2. Get an idea of how many header bits you want to look for (10 is OK to begin with)
 
->4. Experiment with polarity setting
+>3. Experiment with polarity setting
 
 You should aim for steady reception at this stage... then
 
->5. See if packets are repeated for validation
+>1. See if packets are repeated for validation
 
->6. Experiment with how many bytes are used
+>2. Experiment with how many bytes are used
 
->7. Work out whether all bits are included in, or some are excluded from, the packet bytes
+>3. Work out whether all bits are included in, or some are excluded from, the packet bytes
 
 After all this, you need to begin processing the data bytes in the Manchester array to see if you can replicate the readings from your console.  You will need to keep the discard bits problem in mind here (included or excluded?).
 
 To improve reliability of the reception you will also need to be able reject bad packets.  It will probably be by either repetition of packets or a single packet with a checksum (or a more complicated cyclic redundancy polynomial algorithm).  Manchester encoding does not have inherent error checking.  It is quite tolerant of timing varations, but any error checkingof the data must be added after the raw bytes have been received.  Good luck!
+
+Rob Ward
+
+PS An interesting observation for many people who have problems with Weather Stations connected by RF, eg 433MHz, is that if there are sensors close by that are a relatively strong transmitter they can upset the AGC of the simpler 433MHz Rx'ers to the point where a more remote sensor will not be received. The AGC does not recover quick enough to correctly respond to the weaker signal and probably causes the header to timeout (not enough hits) or just prone to errors.  So it may be advantageous in some situations to move stronger signals further away.  The Rain Fall sensor Tx with the Oregon Scientifics is much stronger than the Temperature Tx for example.  Buying a good receiver brand like Dorji can make all the difference here. eg RF-DRA886RX-S the Dorji 433MHZ Transceiver 13dBm SMA CONN
 
