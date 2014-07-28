@@ -45,43 +45,43 @@ You may need to set the variable sync0In as either true or false depending on ho
 
 >  byte    maxBytes   = 5;    //Set the bytes collected after each header. NB if set too high, any end noise will cause an error (alter later)
 
-Set maxBytes to quite low to begin with until you can get very stable packet reception, then experiment with how high you can set the number and still get valid packets. NB If you set the number of bytes too high you will not see packets at all, as any scrambled data received after the valid bits/bytes will cause the program to exit and not show you anything.  Some protocols eg Oregon Scientific have different packet lengths for various sensors.  This has to be detected on the fly and maxBytes changed before the packet reception has finished.
+Set maxBytes to quite low to begin with until you can get very stable packet reception (eg many the same or "explainably" different), then experiment with how high you can set the number and still get "valid" packets (this maybe hard to test until you have sorted repetition or checksum out as well). NB If you set the number of bytes too high you will not see packets at all, as any scrambled data received after the valid bits/bytes will cause the program to exit, and not show you anything.  Some protocols eg Oregon Scientific have different packet lengths for various sensors.  This has to be detected on the fly and maxBytes changed before the packet reception has finished. So a fair bit of modification would be require to accomodate this, but not difficult.
 
 >  byte    nosBytes   = 0;    //Counter stays within 0 -> maxBytes (no need to alter)
 
 >  //Variables for multiple packets
 
->  byte    bank       = 0;    //Points to the array of 0 to 3 banks of results from up to 4 last data downloads (alter later)
+>  byte    bank       = 0;    //Points to the array of 0 to 3 banks of results from up to 4 separate, but sequential, data downloads (alter later, if required)
 
 Some Manchester protocols do not have a checksum, they merely quickly repeat the packet say three of four times and each packet repeated has to be stored into seperate banks and later compared.  If all four banks are the same then the packet is declared valid.  In this program only one bank is used, but there are four defined if you find you need to go down that path.
 
 >  byte    nosRepeats = 0;    //Number of times the header/data is fetched at least once or up to 4 times (alter later)
 
->  //Banks for multiple packets if required (at least one will be needed)
+>  //Banks for multiple packets if required (at least one will be needed), four provided here...
 
 >  byte  manchester[4][20];   //Stores 4 banks of manchester pattern decoded on the fly (alter later)
 
 So in a nutshell
 
->1. Get an idea of what sDelay and lDelay ought to be
+>1. Get an idea of what sDelay and lDelay ought to be (lDelay is usually 2*sDelay)
 
 >2. Get an idea of how many header bits you want to look for (10 is OK to begin with)
 
 >3. Experiment with polarity setting
 
-You should aim for steady reception at this stage... then
+You should aim for steady, repeatable reception at this stage... then
 
->1. See if packets are repeated for validation
+>1. See if packets are repeated for validation (then use banks for validation code)
 
->2. Experiment with how many bytes are used
+>2. Experiment with how many bytes are used (build up gradually)
 
 >3. Work out whether all bits are included in, or some are excluded from, the packet bytes
 
-After all this, you need to begin processing the data bytes in the Manchester array to see if you can replicate the readings from your console.  You will need to keep the discard bits problem in mind here (included or excluded?).
+After all this, you need to begin processing the data bytes in the first Manchester array to see if you can replicate the readings from your console.  You will need to keep the discard bits problem in mind here (how many leading bits included or excluded in the packet?).  Data may not make sense easily if this is not sorted out (ie binary overlapping into adjacent bytes can be messy to decode!)
 
-To improve reliability of the reception you will also need to be able reject bad packets.  It will probably be by either repetition of packets or a single packet with a checksum (or a more complicated cyclic redundancy polynomial algorithm).  Manchester encoding does not have inherent error checking.  It is quite tolerant of timing varations, but any error checkingof the data must be added after the raw bytes have been received.  Good luck!
+To improve reliability of the reception you will also need to be able reject bad packets.  This will probably be by either repetition of packets (ie get 4 in a row the same, and its valid!!) or a single packet with a simple checksum (or a more complicated cyclic redundancy polynomial algorithm).  Manchester encoding does not have inherent data error checking, just waveform checking.  It is quite tolerant of timing varations, but any error detection in the data must be added at the next level after the raw bytes have been received.  Good luck!
 
 Rob Ward
 
-PS An interesting observation for many people who have problems with Weather Stations connected by RF, eg 433MHz, is that if there are sensors close by that are a relatively strong transmitter they can upset the AGC of the simpler 433MHz Rx'ers to the point where a more remote sensor will not be received. The AGC does not recover quick enough to correctly respond to the weaker signal and probably causes the header to timeout (not enough hits) or just prone to errors.  So it may be advantageous in some situations to move stronger signals further away.  The Rain Fall sensor Tx with the Oregon Scientifics is much stronger than the Temperature Tx for example.  Buying a good receiver brand like Dorji can make all the difference here. eg RF-DRA886RX-S the Dorji 433MHZ Transceiver 13dBm SMA CONN
+PS An interesting observation for many people who have problems with Weather Stations connected by RF, eg 433MHz, is that if there are sensors close by that are a relatively strong transmitter they can upset the AGC of the simpler 433MHz Rx'ers to the point where a more remote sensor will not be received. The AGC does not recover quick enough to correctly respond to the weaker signal and probably causes the header to timeout (not enough hits) or just prone to errors.  So it may be advantageous in some situations to move stronger signals further away.  The Rain Fall sensor Tx with the Oregon Scientifics is much stronger than the Temperature Tx for example.  Buying a good modern receiver brand like Dorji can make all the difference here. eg RF-DRA886RX-S, the Dorji 433MHZ Transceiver 13dBm SMA CONN
 

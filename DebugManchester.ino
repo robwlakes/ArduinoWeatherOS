@@ -2,7 +2,12 @@
  Manchester Decoding, reading by delay rather than interrupt
  Rob Ward July 2014
  This example code is in the public domain.
- DebugVersion_08
+ Use at your own risk, I will take no responsibility for any loss whatsoever its deployment.
+ Visit https://github.com/robwlakes/ArduinoWeatherOS for the latest version and
+ documentation. Filename: DebugManchester.ino
+ 
+ DebugVersion_09, 28tyh July 2014
+ 
  */
 
 //Interface Definitions
@@ -10,20 +15,20 @@ int RxPin           = 8;   //The number of signal from the Rx
 int ledPin          = 13;  //The number of the onboard LED pin
 
 // Variables for Manchester Receiver Logic:
-word    sDelay     = 245;  //Small Delay about 1/4 of bit duration  try like 250 to 500
-word    lDelay     = 490;  //Long Delay about 1/2 of bit duration  try like 500 to 1000, 1/4 + 1/2 = 3/4
+word    sDelay     = 250;  //Small Delay about 1/4 of bit duration  try like 250 to 500
+word    lDelay     = 500;  //Long Delay about 1/2 of bit duration  try like 500 to 1000, 1/4 + 1/2 = 3/4
 byte    polarity   = 1;    //0 for lo->hi==1 or 1 for hi->lo==1 for Polarity, sets tempBit at start
 byte    tempBit    = 1;    //Reflects the required transition polarity
 byte    discards   = 0;    //how many leading "bits" need to be dumped, usually just a zero if anything eg discards=1
 boolean firstZero  = false;//has it processed the first zero yet?  This a "sync" bit.
 boolean noErrors   = true; //flags if signal does not follow Manchester conventions
 //variables for Header detection
-byte    headerBits = 10;   //The number of ones expected to make a valid header
+byte    headerBits = 15;   //The number of ones expected to make a valid header
 byte    headerHits = 0;    //Counts the number of "1"s to determine a header
 //Variables for Byte storage
 byte    dataByte   = 0;    //Accumulates the bit information
 byte    nosBits    = 0;    //Counts to 8 bits within a dataByte
-byte    maxBytes   = 5;    //Set the bytes collected after each header. NB if set too high, any end noise will cause an error
+byte    maxBytes   = 9;    //Set the bytes collected after each header. NB if set too high, any end noise will cause an error
 byte    nosBytes   = 0;    //Counter stays within 0 -> maxBytes
 //Variables for multiple packets
 byte    bank       = 0;    //Points to the array of 0 to 3 banks of results from up to 4 last data downloads 
@@ -128,7 +133,7 @@ void loop(){
         }//end of detecting a "zero" inside a header
         else{
           //we have our header, chewed up any excess and here is a zero
-          if ((!firstZero) && (headerHits>=headerBits)){ //if first zero, it has not been found previously
+          if ((!firstZero)&&(headerHits>=headerBits)){ //if first zero, it has not been found previously
             firstZero=true;
           }//end of finding first zero
           add(bitState);
