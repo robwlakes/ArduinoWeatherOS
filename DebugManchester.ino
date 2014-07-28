@@ -128,7 +128,7 @@ void loop(){
         }//end of detecting a "zero" inside a header
         else{
           //we have our header, chewed up any excess and here is a zero
-          if (!firstZero && (headerHits>=headerBits)){ //if first zero, it has not been found previously
+          if ((!firstZero) && (headerHits>=headerBits)){ //if first zero, it has not been found previously
             firstZero=true;
           }//end of finding first zero
           add(bitState);
