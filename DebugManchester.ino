@@ -122,13 +122,13 @@ void loop(){
       }//end of dealing with ones
       else{  //bitState==0 could first error, first zero or packet
         // if it is header there must be no "zeroes" or errors
-        if((headerHits<headerBits)&&(!firstZero)){
+        if(headerHits<headerBits){
           //Still in header checking phase, more header hits required
           noErrors=false;//landing here means header is corrupted, so it is probably an error
         }//end of detecting a "zero" inside a header
         else{
           //we have our header, chewed up any excess and here is a zero
-          if (!firstZero){ //if first zero, it has not been found previously
+          if (!firstZero && (headerHits>=headerBits)){ //if first zero, it has not been found previously
             firstZero=true;
           }//end of finding first zero
           add(bitState);
