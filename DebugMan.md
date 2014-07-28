@@ -37,7 +37,7 @@ Your CRO will also give you an idea of how many header bits are part of the prot
 
 >  byte    discards    =0;      //Expecting all bits to be inside byte boundaries, set to number of leading bits to be dumped (alter later)
 
-You may need to set the variable sync0In as either true or false depending on how the byte boundaries line up.  You will need to be aware when trying to process the data that it maybe not alligned for the easiest processing if the sync zero is included in the first byte or excluded.
+You may need to set the variable discards (eg =0 means no discards, sync zero is included in the packet, or =1, discard the sync zero from the packet, or =2 discards the first two bits) depending on how the byte boundaries line up.  You will need to be aware when trying to process the data that it maybe not alligned for the easiest processing if the sync zero, for example, is included in the first byte or excluded.
 
 >  byte    dataByte   = 0;    //Accumulates the bit information (no need to alter)
 
@@ -83,5 +83,5 @@ To improve reliability of the reception you will also need to be able reject bad
 
 Rob Ward
 
-PS An interesting observation for many people who have problems with Weather Stations connected by RF, eg 433MHz, is that if there are sensors close by that are a relatively strong transmitter they can upset the AGC of the simpler 433MHz Rx'ers to the point where a more remote sensor will not be received. The AGC does not recover quick enough to correctly respond to the weaker signal and probably causes the header to timeout (not enough hits) or just prone to errors.  So it may be advantageous in some situations to move stronger signals further away.  The Rain Fall sensor Tx with the Oregon Scientifics is much stronger than the Temperature Tx for example.  Buying a good modern receiver brand like Dorji can make all the difference here. eg RF-DRA886RX-S, the Dorji 433MHZ Transceiver 13dBm SMA CONN
+PS A very interesting observation for many people who have problems with Weather Stations connected by RF, eg 433MHz, is that if there are sensors close by that are a relatively strong transmitter they can upset the AGC of the simpler 433MHz Rx'ers to the point where a more remote sensor will not be received. The AGC does not recover quick enough to correctly respond to the weaker signal and probably causes the header to timeout (not enough hits) or just prone to errors.  So it may be advantageous in some situations to move stronger signals further away.  The Rain Fall sensor Tx with the Oregon Scientifics is much stronger than the Temperature Tx for example.  Buying a good modern receiver brand like Dorji can make all the difference here. eg RF-DRA886RX-S, the Dorji 433MHZ Transceiver 13dBm SMA CONN
 
