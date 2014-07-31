@@ -15,7 +15,11 @@ The above delays are the first things to work on.  They do not need to be very e
 
 >  byte    polarity   = 1;    //0 for lo->hi==1 or 1 for hi->lo==1 for Polarity, sets tempBit at start (alter early)
 
->  byte    tempBit    = 1;    //Reflects the required transition polarity (no need to alter)
+>  byte    tempBit    = 1;    //Reflects the required transition polarity (no need to alter) for the following data bit.
+
+>  byte    bitState      ;    //State of the RxPin 3/4 way through Bit Waveform
+
+>  byte    discards   = 0;    //how many leading "bits" need to be dumped, usually just a zero if anything eg discards=1
 
 The variable tempBit simply follows the raw data coming in, but is exclusive-OR'ed with Polarity to invert it (if Neg Polarity is selected) before being packed into the byte array.
 
@@ -43,7 +47,7 @@ You may need to set the variable discards (eg =0 means no discards, sync zero is
 
 >  byte    nosBits    = 0;    //Counts to 8 bits within a dataByte (no need to alter)
 
->  byte    maxBytes   = 5;    //Set the bytes collected after each header. NB if set too high, any end noise will cause an error (alter later)
+>  byte    maxBytes   = 6;    //Set the bytes collected after each header. NB if set too high, any end noise will cause an error (alter later)
 
 Set maxBytes to quite low to begin with until you can get very stable packet reception (eg many the same or "explainably" different), then experiment with how high you can set the number and still get "valid" packets (this maybe hard to test until you have sorted repetition or checksum out as well). NB If you set the number of bytes too high you will not see packets at all, as any scrambled data received after the valid bits/bytes will cause the program to exit, and not show you anything.  Some protocols eg Oregon Scientific have different packet lengths for various sensors.  This has to be detected on the fly and maxBytes changed before the packet reception has finished. So a fair bit of modification would be require to accomodate this, but not difficult.
 
