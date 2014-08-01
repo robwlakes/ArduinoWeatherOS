@@ -8,7 +8,7 @@
  
  Please leave comment or suggestions in the "Issues" feature on the GIT-Hub site
  
- Remember to check both Polarity settings for sensible data.
+ Remember to check both nos of Bytes and header hits settings for sensible data.
  
  DebugVersion_09, 28tyh July 2014
  
