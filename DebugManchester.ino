@@ -1,16 +1,12 @@
 /* 
  Manchester Decoding, reading by delay rather than interrupt
- Rob Ward July 2014
+ Rob Ward August 2014
  This example code is in the public domain.
  Use at your own risk, I will take no responsibility for any loss whatsoever its deployment.
  Visit https://github.com/robwlakes/ArduinoWeatherOS for the latest version and
- documentation. Filename: DebugManchester.ino ReadMe: DebugMan.md
-
- NB: Choosing the wrong polarity will still provide "data", but will be incorrect
- even thought the two delays are working properly!!!
- Remember to check both Polarity settings for sensible data.
+ documentation. Filename: DebugManchester.ino
  
- DebugVersion_09, 28tyh July 2014
+ DebugVersion_10, 1stAugust 2014
  
  */
 
@@ -19,11 +15,10 @@ int RxPin           = 8;   //The number of signal from the Rx
 int ledPin          = 13;  //The number of the onboard LED pin
 
 // Variables for Manchester Receiver Logic:
-word    sDelay     = 240;  //Small Delay about 1/4 of bit duration try like 220 to 480
-word    lDelay     = 480;  //Long Delay about 1/2 of bit duration  try like 440 to 880, 1/4 + 1/2 = 3/4
+word    sDelay     = 250;  //Small Delay about 1/4 of bit duration  try like 250 to 500
+word    lDelay     = 500;  //Long Delay about 1/2 of bit duration  try like 500 to 1000, 1/4 + 1/2 = 3/4
 byte    polarity   = 1;    //0 for lo->hi==1 or 1 for hi->lo==1 for Polarity, sets tempBit at start
-byte    tempBit       ;    //Reflects the required transition polarity
-byte    bitState      ;    //State of the RxPin 3/4 way through Bit Waveform
+byte    tempBit    = 1;    //Reflects the required transition polarity
 byte    discards   = 0;    //how many leading "bits" need to be dumped, usually just a zero if anything eg discards=1
 boolean firstZero  = false;//has it processed the first zero yet?  This a "sync" bit.
 boolean noErrors   = true; //flags if signal does not follow Manchester conventions
@@ -33,7 +28,7 @@ byte    headerHits = 0;    //Counts the number of "1"s to determine a header
 //Variables for Byte storage
 byte    dataByte   = 0;    //Accumulates the bit information
 byte    nosBits    = 0;    //Counts to 8 bits within a dataByte
-byte    maxBytes   = 6;    //Set the bytes collected after each header. NB if set too high, any end noise will cause an error
+byte    maxBytes   = 5;    //Set the bytes collected after each header. NB if set too high, any end noise will cause an error
 byte    nosBytes   = 0;    //Counter stays within 0 -> maxBytes
 //Variables for multiple packets
 byte    bank       = 0;    //Points to the array of 0 to 3 banks of results from up to 4 last data downloads 
@@ -61,7 +56,7 @@ void setup() {
   Serial.begin(115200);//make it fast so it dumps quick!
   pinMode(RxPin, INPUT);
   pinMode(ledPin, OUTPUT);
-  Serial.println("Debug Manchester Version GIT-Hub V01");
+  Serial.println("Debug Manchester Version 09");
   lDelay=2*sDelay;//just to make sure the 1:2 ratio is established. They can have some other ratio if required
   Serial.print("Using a delay of 1/4 bitWaveform ");// +-15% and they still seem to work ok, pretty tolerant!
   Serial.print(sDelay,DEC);
@@ -91,7 +86,7 @@ void setup() {
 
 // Main routines, find header, then sync in with it, get a packet, and decode data in it, plus report any errors.
 void loop(){
-  tempBit=polarity^1; //these begin as opposites for each packet
+  tempBit=polarity^1; //these begin the opposites for a packet
   noErrors=true;
   firstZero=false;
   headerHits=0;
@@ -108,18 +103,16 @@ void loop(){
       noErrors=false;//something has gone wrong, polarity has changed too early, ie always an error
     }//exit and retry
     else{
-      //now grab the bitState before setting up for next bit & correct for polarity
-      bitState = tempBit ^ polarity;//Polarity=1, invert OR Polarity=0, ignore
-      //Now work on what the next bit waveform is going to be 
+      byte bitState = tempBit ^ polarity;//if polarity=1, invert the tempBit or if polarity=0, leave it alone.
       delayMicroseconds(lDelay);
       //now 1 quarter into the next bit pattern,
-      if(digitalRead(RxPin)==tempBit){ //if RxPin has NOT swapped, then next data bit value IS swapping
+      if(digitalRead(RxPin)==tempBit){ //if RxPin has not swapped, then bitWaveform is swapping
         //If the header is done, then it means data change is occuring ie 1->0, or 0->1
-        //data transition detection must swap, so it loops for the opposite transition in the next bit waveform
+        //data transition detection must swap, so it loops for the opposite transitions
         tempBit = tempBit^1;
-      }//end of detecting no transition at end of bit waveform
+      }//end of detecting no transition at end of bit waveform, ie end of previous bit waveform same as start of next bitwaveform
 
-      //Now process the tempBit state and interept data as definite 0 or 1's, (Polarity corrected by now) 
+      //Now process the tempBit state and make data definite 0 or 1's, allow possibility of Pos or Neg Polarity 
       if(bitState==1){ //1 data could be header or packet
         if(!firstZero){
           headerHits++;
@@ -142,7 +135,6 @@ void loop(){
           //we have our header, chewed up any excess and here is a zero
           if ((!firstZero)&&(headerHits>=headerBits)){ //if first zero, it has not been found previously
             firstZero=true;
-            //Serial.print("!");
           }//end of finding first zero
           add(bitState);
         }//end of dealing with a zero
@@ -170,7 +162,7 @@ void add(byte bitData){
       //Serial.print("B");
     }
     if(nosBytes==maxBytes){
-      hexBinDump();//for debug purposes dump out in hex and bainary
+      hexBinDump();//for debug purposes dump out in hex and binary
       //analyseData();//later on develop your own analysis routines
     }
   }
@@ -209,6 +201,21 @@ void eraseManchester(){
     }
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
