@@ -1,7 +1,7 @@
 General Manchester Debugger Ver8
 ================================
 
-Hi, here are some rough notes for the moment to accompany the Manchester Debug Program Version 8.
+Hi, here are some rough notes for the moment to accompany the Manchester Debug Program Version 10.
 
 Only a few things need to be changed and tested early, others much later. Pretty much an easy recipe...
 
