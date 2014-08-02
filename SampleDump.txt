@@ -1,4 +1,20 @@
-Debug Manchester Version GIT-Hub V01
+Below is a dump of the output from an Arduino running the DebugAuto.ino program.
+It was using a Dorji 433MHz receiver and there were three separate transmitters
+Rainfall (repeats 47sec), Wind Speed+Direction (repeats 14sec) and 
+Temperature+Humidity (repeats 50secs).
+These create plenty of traffic to observe and all three work well with delays
+
+sDelay = 300-360uSec so the timing is very tolerant, yet robust.  In this example 
+run there requirement of 15 header hits, and 9 bytes for each packet to run the
+system a bit harder to show any bad timings up quicker.
+
+If you use this program I suggest you start off with a lower value for header hits,
+say 10 and maybe about 5 bytes.  You can make it more demanding when you get your
+sDelay in range and know what polarity is working.
+
+Here we go....
+
+Debug Manchester Version GIT-Hub V03
 Using a delay of 1/4 bitWaveform 200 uSecs 1/2 bitWaveform 400 uSecs 
 Positive Polarity lo->hi=1
 15 bits expected for a valid header
