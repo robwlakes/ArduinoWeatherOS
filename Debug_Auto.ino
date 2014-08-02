@@ -7,10 +7,82 @@
  documentation. Filename: DebugManchester.ino ReadMe: DebugMan.md
  
  Please leave comment or suggestions in the "Issues" feature on the GIT-Hub site
+  
+ DebugAuto, 28th July 2014
  
- Remember to check both nos of Bytes and header hits settings for sensible data.
+ This version steps automatically through a series of delays 10uS at a time each 5mins
+ and attempts to decode Manchester encoded signals.  The Polarity of the code can be either
+ positive or negative.  This program detects longer intervals bewtween transitions
+ as 'faulty' zeroes and automatically reverses the Polarity setting for subsequent
+ packets.  Because it starts off at a fairly unlikely setting for a Weather Station
+ (low durations between samples) few packets will be initially decoded, if any at all.
+ You will have to be patient and wait until the timings get closer and data finally
+ begins to appear.  This may involve looking at a static screen for quite a while,
+ as it steps through the 10uS increments. When the data does begin to appear then
+ note down the Polarity and what delay is best.  You should also allow it to go through
+ to longer and longer delays to there the packets begin to reduce in numbers so you know
+ you have the best mid point for the sDelay setting. 
+
+ The aim of this program it to provide experimenters and hackers a simple to use tool that
+ will reveal the basic settings to receive a particular systems codes.  The program can
+ be easily modified to become the basis of permanent installations when an experimenter
+ adds in their own calculations and procedures. I have overdone the comments but hopefully
+ experimenters, especially beginners will appreciate the overflow! Experts delete them!
+ For actual installations the program can be stripped back to its bare essentials by
+ deleting all the debug and incrementing stuff etc and putting chosen final values for all
+ the parameters.
+
+ Considerable lattitude is allowed in choosing a sDelay value to set up the Manchester
+ decoding and experimenters may find there are a range of values of sDelay to choose from.
+ Generally aim for the mididle ground to give you a bit of room to handle errors on either
+ side. Variations up to +-10-15% are tolerated due to the program syncing each bit
+ to the middle transition event that always occurs in proper Manchester encoding.  So
+ small errors are contirnually corrected and do not accumulate.
  
- DebugVersion_09, 28tyh July 2014
+ So expect to see a fairly broad band of sDelays that will work OK.  Once you 
+ are satisfied you have the sDelay and Polarity worked out (only two settings!)
+ you can begin pulling the program apart for your own purposes and building your
+ own version, eg what bits get discarded, how many bytes, packet repeat etc
+ 
+ The knowledge for this program came from wanting to intercept the signals from
+ a Bios (or Thermor) weather station to feed into my 24/7 weather www page.
+ I had to get to get to grips with the Manchester encoding first and after many
+ false starts I succeeded.  After that came the decryption of the packets and
+ calculating of meaningful values.  My old Bios broke down and I swapped to an Oregon
+ Scientific WS, and had to do it all over again.  Both quite different animals, so to
+ speak, but both used Manchester Encoding.  Second time through was a lot quicker
+ but after having tried to help people do the same on the Arduino Forums I figured
+ I needed to publish some good stuff for people to read up on.
+ 
+ After a while I wanted to streamline my Manchester decoding logic and the result
+ of that is here in this program.  With better logic and a much tighter procedure
+ (instead of one routine for the header and another for the packet data, this routine
+ can do it all in one!) design, I have been able to make it almost automatic to 
+ at least get some Manchester data from something like a weather station. If the 
+ bit waveform has a duration very much above or below 1mS the automatic part will
+ will fall down.  If the duration gets very short where the delay caused by the 
+ processing becomes similar in size to the sDelay then program will probably work
+ but will need fairly inspired alterations.  The simple relationship that
+    lDelay=2*sDelay will probably break down. Then the sDelay and lDelay may need to
+ to be determined independently.  For longer delays the 1:2 relation will work fine
+ but the auto detection will need the loopCount and timeout turned into a word
+ variable as it is only a byte varaible at the moment to maximise the speed of the
+ loopCount++ counting.  As the delays get bigger counting in words will not matter.
+     timeout=lDelay/5; may need to change as well to keep the timeout (the number
+ of loop++'s) to be about 1.5 times the duration of the sDelay duration.
+ 
+ Obviously once the validation of the packets is working ie checked by repeats or
+ a numerical checksum, then if this process is repeated the best timings will become
+ even more evident.  This checking will eliminate packets that don't have any
+ obvious Manchester decoding errors, but do in fact have internal errors.
+ 
+ Please read the other documents on my GIT-Hub site that accompany this program for
+ a fuller understanding of the Manchester concepts so you can "do you own thing!!"
+ 
+ I hope you enjoy your own personal journey as I have enjoyed mine and this program
+ heklps you enjoy even more :-)  Best wishes for your progress!
+ 
+ Rob Ward
  
  */
 
@@ -29,9 +101,10 @@ boolean noErrors   = true; //flags if signal does not follow Manchester conventi
 byte    timeout       ;    //Maximum loops allowed to look for the next bit transition 
 byte    loopCount     ;    //Incremented inside the loop looking for next bit transition
 //variables for Header detection
-byte    headerBits = 15;   //The number of ones expected to make a valid header
+byte    headerBits = 10;   //The number of ones expected to make a valid header
 byte    headerHits = 0;    //Counts the number of "1"s to determine a header
 boolean firstZero  = false;//has it processed the first zero yet?  This a "sync" bit.
+word    nosHits    = 0;    //number hex dumps achieved (not necessarily error free, just hits!)
 //Variables for Byte storage
 byte    discards   = 0;    //how many leading "bits" need to be dumped, usually just a zero if anything eg discards=1
 byte    dataByte   = 0;    //Accumulates the bit information
@@ -85,7 +158,7 @@ void setup() {
   sei();
 
 
-  Serial.println("Debug Manchester Version GIT-Hub V01");
+  Serial.println("Debug Manchester Version GIT-Hub V03");
   lDelay=2*sDelay;//just to make sure the 1:2 ratio is established. They can have some other ratio if required
   Serial.print("Using a delay of 1/4 bitWaveform ");// +-15% and they still seem to work ok, pretty tolerant!
   Serial.print(sDelay,DEC);
@@ -109,7 +182,7 @@ void setup() {
   }
   timeout=lDelay/5;//Rough number to indicate max loops allowed, if exceeded usually wrong polarity chosen, heals itself if wrong
   Serial.print(timeout,DEC);
-  Serial.println(" timeout for wrong Polarity");
+  Serial.println(" initial timeout to detect wrong Polarity");
   Serial.println("P 00 00001111 01 22223333 02 44445555 03 66667777 04 88889999 05 AAAABBBB 06 CCCCDDDD 07 EEEEFFFF 08 00001111 90 22223333"); 
   Serial.print("sDelay =");
   Serial.println(sDelay,DEC);
@@ -124,8 +197,13 @@ ISR(TIMER1_COMPA_vect){
   if (seconds == 300){//make 300 for each output ie 5 minutes
     sDelay = sDelay+10;
     seconds = 0;
-    Serial.print("sDelay =");
+    Serial.print("Nos Hits =");//Number of successful Hex dumps (not necessarily fre of errors)
+    Serial.println(nosHits,DEC);
+    nosHits=0;
+    Serial.print("sDelay =");//So the progress of the increments on sDelay can be monitored
     Serial.println(sDelay,DEC);
+    lDelay = sDelay*2;//Assume the sampling delays are ratio 1:2
+    timeout=lDelay/5; //Rough number to indicate max loops allowed, if exceeded usually wrong polarity chosen, heals itself if wrong
   }
 } //end of interrupt routine
 
@@ -141,7 +219,7 @@ void loop(){
     loopCount=0;
     while(digitalRead(RxPin)!=tempBit){
       //pause here until a transition is found
-      loopCount++;//track how long the wait is, too long=error!
+      loopCount++;//track how long the wait is, if too long=error!
     }//at Data transition, half way through bit pattern, this should be where RxPin==tempBit
     delayMicroseconds(sDelay);//skip ahead to 3/4 of the bit pattern
     // 3/4 the way through, if RxPin has changed it is definitely an error
@@ -160,11 +238,14 @@ void loop(){
         //data transition detection must swap, so it loops for the opposite transition in the next bit waveform
         tempBit = tempBit^1;
       }//end of detecting no transition at end of bit waveform
+      //when looping to detect the transition in middle of bit waveform it must never take too long
       if(loopCount>timeout){
-        noErrors=false;
+        noErrors=false;//not allowed to sync on an incorrect transition
+        //if in the header phase and looking for the sync 0 
         if ((!firstZero)&&(headerHits>headerBits)){
-          //Serial.println(loopCount,DEC);
-          polarity = polarity^1;
+          //ending here means the zero was found but polarity was wrong
+          //Serial.println(loopCount,DEC);//enable for debugging
+          polarity = polarity^1;//switch polarity and try for next packet
           //Serial.print("Polarity now =");
           //Serial.println(polarity,DEC);
         }
@@ -203,10 +284,6 @@ void loop(){
   digitalWrite(ledPin,0); //data processing exited, look for another header
 }//end of mainloop
 
-//Read the binary data from the bank and apply conversions where necessary to scale and format data
-void analyseData(){ 
-}
-
 void add(byte bitData){
   if (discards>0){ //if first one, it has not been found previously
     discards--;
@@ -221,15 +298,20 @@ void add(byte bitData){
       //Serial.print("B");
     }
     if(nosBytes==maxBytes){
+      nosHits++;//keep track
       hexBinDump();//for debug purposes dump out in hex and bainary
       //analyseData();//later on develop your own analysis routines
     }
   }
 }
 
+//Read the binary data from the bank and apply conversions where necessary to scale and format data
+void analyseData(){ 
+}
+
 void hexBinDump(){
   //Print the fully aligned binary data in manchester[bank] array
-  Serial.print(polarity,DEC);
+  Serial.print(polarity,DEC);//show what polarity was used to reveal the packet
   Serial.print(" ");
   for( int i=0; i < maxBytes; i++){ 
     byte mask = B10000000;
