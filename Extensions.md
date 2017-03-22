@@ -6,7 +6,7 @@ Several features became desirable after the original system had been running for
   of the signals being received. The solution was tackled in two ways, but involving similar parts of the program.
   An RGB LED was added to the board to indicate which sensor transmitter was detected.  By combining Red, Blue and/or Green I could easily produce 8 recognisable states from the LED.
   Simply observing the board would indicate that the different sensors were being logged.  This gave a quick indication, for example after a restart that the Arduino was functioning properly,
-  and so were the 3 Oregon sensors
+  and so were the 4 Oregon sensors
 ####  Colour coding was:
 ####  Red = Temperature and Humidity
 ####  Green = Wind Direction and Speed
