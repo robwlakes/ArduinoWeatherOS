@@ -28,7 +28,7 @@ small periods of time overnight in the cool night air.
 #### Yellow = UV Light Sensor
 #### Purple = Experimental
 
-![alt text](images/WMR86.JPG?raw=true "Oregon Scientific WMR86 Sensors")
+![alt text](images/RGB_Status.jpg?raw=true "RGB Status LED")
 
 
 ### Software Version
