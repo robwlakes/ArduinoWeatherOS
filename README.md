@@ -1,7 +1,7 @@
 Weather Stations
 ================
 
-###Arduino Uno, 433MhzRx and Oregon Scientific WMR86 Weather Station
+### Arduino Uno, 433MhzRx and Oregon Scientific WMR86 Weather Station
 
 This project allows the 433MHz signals from an Oregon Scientific WMR86 weather station to be intercepted and decoded  into simple decimal values using an Arduino Uno. The values for Wind Direction, Wind Speed, Temperature, Humidity and Rainfall are then sent via the USB/Serial port on the Arduino to the host computer.  In my case I use a Python program to interpret this CSV formatted string of characters and plot the above parameters for display on my website http://www.laketyersbeach.net.au/weather.html
 
@@ -11,7 +11,7 @@ The Arduino listens continually for the three WMR86 sensor's broadcasts and merg
 
 ![alt text](images/schematic.png?raw=true "Arduino Schematic")The wiring
 
-####Manchester Protocol
+#### Manchester Protocol
 
 The Ardunio algorithm to decode the Manchester protocol uses timed delays to sample the waveform from the 433MHz Rx and not interrupts and direct measurement of waveform transitions.  This has a number of implications.  The main one is that Arduino is continually sampling and analysing the incoming waveform.  As it is a dedicated processor in this application and has no other function, so this is not a problem. The benefit is that it does simplify the reception and analysis of the waveforms.  The simple decoding strategy should also be worth studying by anyone else attempting to leverage other systems that use Manchester encoding. To that end a fairly lengthy explanation is offered below. 
 
@@ -21,7 +21,7 @@ The cheap 433MHz Rx's available have a simple Automatic Gain Control and Bias De
 
 In other words, the decoding program needs to be able to determine whether it has seen a 430uS 'no signal' followed by a 430uS 'on signal' and so has received a 0, OR has received a 430uS 'on signal" followed by a 430uS 'no signal' and so received a 1. 'on signal' makes the Rx output go 'hi' and 'no signal' makes the Rx output go 'lo'.
 
-####How is this decoded?
+#### How is this decoded?
 
 The first very important prior knowledge to have is which of the two polarity conventions for Manchester encoding this system uses.  Arguments are put forward for both possibilities as being correct, but either polarity works as good as the other and with a simple audio sampler, such as Audacity, is simple to work out.  The transition polarity used by OS is that a Data 1 is hi->lo and Data 0 is lo->hi.
 
@@ -33,7 +33,7 @@ Curiously a long string of Data 1's will have the same looking waveform as a lon
 
 Critically the only guaranteed meaningful regular transition of states occurs in the middle of the Bit Waveform.  Consequently is essential to concentrate the decoding algorithm around the center of the Bit Waveform to keep it properly synced.
 
-####RF practicalities... 
+#### RF practicalities... 
 
 Part of the practical application of the Manchester protocol combined with simple 433MHz Tx/Rx combo's is to use a header sequence of bits, usually 30 or so 1's.  This quickly stablizes the Rx AGC and establishes the Bias Detection point so the simple 433MHz Rx has a good chance of settling down and producing a clean logic waveform after say 10 on/off transmissions.  The decoding program can then sample the Bit Waveform by synchronising (ie looping and waiting) the program to an hi->lo transition, which is the midway point of a Bit Waveform for a 1.  This polarity how it works for the OS protocol, hi->lo==1, lo->hi==0 (Wikipedia says the opposite polarity convention is also used by other systems, and both are just as valid).
 
@@ -45,7 +45,7 @@ This Diagram 2 below is showing a stream on 1's as the header.  The algorithm is
 
 Diagram 2 illustrates the process of detecting a signal and locking into the data in the packet. From the lefthand side, A is showing static, or noise, and when a signal begins in B the AGC on the 433MHz receiver is stabilizing. Note that early on the program will try to lock onto the negative going edge as shown with the downward black arrow at the start of Phase C.  Phase C is the stream of 1's known as the header. Here I have illustrated that receiving fifteen 1's will indicate we have a valid header.  Phase D indicates that we have more header bits than we need (this allows for some drift about the AGC starting point). So any excess 1's are then dumped until the bit pattern changes, when at Phase E the bit pattern for 0 arrives. From then on, Phase F (the remainder of the packet, NB not all shown) any number of data bits, 1&0's, can be received.  Sometimes the E&F Phase are within the Byte pattern, and sometimes the start bit, E is excluded and it just flags the start, and the bytes begin at Phase F.
 
-####Extracting data from the bit stream
+#### Extracting data from the bit stream
 
 How does it know they are properly formed and timed Bit Waveforms?  (Please refer to diagram 3 below, NB 7 Bit Waveforms are shown, only alternative ones are labelled). To filter out noise, the input is sampled until a hi->lo event is detected eg at (B) and then again the program re-samples the Rx output about a 1/4 of a Bit Waveform later at (E), to see if it is still lo.  If is lo (as the diagram shows) then it is possibly a genuine middle of a 1 Bit Waveform, however if it is not a lo then it was not a genuine hi->lo middle of a 1 Bit Waveform, and the algorithm begins the search for another hi->lo transition all over again.  However if this preliminary test is true, it has possibly sampled a midpoint of a 1, so it waits for another half a Bit Waveform (F).  This timing is actually 1/4 of the way into the next Bit Waveform, and because we know we are looking for another 1, then the signal should have gone hi by then. If is not hi, then the original sample, that was possibly the mid point of a 1 Bit Waveform is rejected, as overall, it has not followed the 'Bit Waveform rules', and the search (looping) for then next hi->lo transition begins at the start, all over again. Here is a diagram to highlight the previous ideas.
 
@@ -61,7 +61,7 @@ The transitions at the orange 1-7 do not carry data, but if transitions do occur
 
 The synchronising 0 bit and may or may not be included in the byte boundaries.  Some implementations send a single 0 bit then all the bytes of information, whereas the OS example we are dealing with here just makes sure the first bit in the first byte sent, is always a 0.
 
-####Capturing the data
+#### Capturing the data
 
 Once this "0" is detected then the data stream can be considered synchronised with the detector.  The program to decode the Oregon Scientific Weather Station's sensors then decodes a sequence of bytes that have data encoded in both straight binary and other times, BCD.  The number of bytes per packet for each transmitter can also vary.  The program must be able to recognise each transmitter early and change the number of subsequent bytes expected for each type.  To do this the program begins downloading all bytes (more on that later) and identifies the ID bytes within the first 2 bytes, and when a particular sensor is detected it immediately sets the exact number of bytes expected.  So temp/Humidity decoding requires 10 bytes (but only uses 9), Anemometer decoding requires 10 bytes and uses them all, and the Rainfall sensor decoding requires 11 bytes but only needs the four most significant bits of the last byte.   If 11 bytes were accepted all the time, the Rainfall would work, but the other two would fail as their signals return to random noise after 10 bytes and this would cause them to be rejected.
 
@@ -73,7 +73,7 @@ Once a data packet is received it is given a checksum check before being declare
 
 Why Oregon Scientific chose this rearrangement is best left up to them to explain, but applying this swapping of positions makes all the data in the stored bytes array so much more logical as well. Binary numbers are found in the correct ascending order etc.  Plus when it comes to the Checksum, it is also simpler to calculate as well.  Take each 4 bit nybble in the data packet (excluding the checksum byte) and add them up as an 8 bit result.  This will result in a byte that can be compared to the last byte in the packet, the checksum byte.  The number of nybbles for  Temp/Humidity is 16, Anemometer 18, and rainfall 19 (NB rainfall Check Sum byte, is made up of nybbles 20 and 21, ie it bridges the byte boundary).
 
-####Processing and exporting the data
+#### Processing and exporting the data
 
 Once the bits and bytes are stored in this fashion then the checksum becomes trivial, just add up the nybbles and compare to the checksum byte. Reject any packet that does not workout.  A simple checksum like this is prone to substitution errors getting through undetected (ie one byte has an error bit, but is balanced out by an inverted error bit in another byte with the same place value.  Cyclic redundancy methods for checking data validity are much more robust than the simple arithmetic checksums, but they are not used on the OS Sensors. However by the time the two bytes for the sensor type ID, and the rolling ID code for a particular sensor are put aside, the critical data that changes is down to  5-7 bytes, and probably the checksum for such a small sample is quite acceptable (though if you intend to use any of these sensors for mission critical stuff you may like to disagree on that opinion).  Fortunately for me it was easy to program.
 
@@ -85,7 +85,7 @@ This description should give you a good idea of how the OS V3.0 protocol works a
 
 ![alt text](images/WMR86.JPG?raw=true "Oregon Scientific WMR86 Sensors") http://au.oregonscientific.com/  WMR86 to get your own :-)
 
-####Manchester Debugger
+#### Manchester Debugger
 
 There is now a support Debug Program you can use to develop your own applications in this repository.  Edit three values, recipe like, and you could be receiving Manchester encoded bytes in next to no time. Then over to you! Check it out.
 
