@@ -1,12 +1,12 @@
 /*
  Oregon Scientific Weather Station and Manchester Decoding, (reading by delay rather than interrupt)
- Author: Rob Ward 
+ Rob Ward 2015
  This example code is in the public domain.
  Use at your own risk, I will take no responsibility for any loss whatsoever for its deployment.
  Visit https://github.com/robwlakes/ArduinoWeatherOS for the latest version and
  documentation. Filename: MainWeather_09.ino
 
- Main_Weather_09, 22 March 2017  (works with Python3)
+ Main_Weather, 24 Dec 2017  (works with Protocol Version 3.0)
 
  The aim of this version is use the new Manchester decoding routine and incorporate detection
  of a Oregon compatible sensor built to cover novel environmental sensors.
@@ -78,6 +78,8 @@
  I was not able to protect the circuit.
  SI1145 Digital UV Index / IR / Visible Light Sensor could also be useful as it reports SPI 
  and can actually give predicted UV levels by measuring Visible light and IR.
+
+ Special thanks to Darko in Italy who corrected an error when decoding negative temperatures. Grazie ragazzi!!!
  
  The Future:
  The Solar Power sensor (a silicon cell's open voltage under sunlight) has been added
@@ -102,8 +104,8 @@ int     GrePin     = 6;     //The Green LED, turn on for a valid Wind sensor pac
 int     BluPin     = 5;     //The Blue LED, turn on for a valid Rain sensor packet
 
 // Variables for Manchester Receiver Logic:
-word    sDelay     = 240;    //Small Delay about 1/4 of bit duration  try like 250 to 500
-word    lDelay     = 490;    //Long Delay about 1/2 of bit duration  try like 500 to 1000, 1/4 + 1/2 = 3/4
+word    sDelay     = 250;    //Small Delay about 1/4 of bit duration  try like 250 to 500
+word    lDelay     = 500;    //Long Delay about 1/2 of bit duration  try like 500 to 1000, 1/4 + 1/2 = 3/4
 byte    polarity   = 1;      //0 for lo->hi==1 or 1 for hi->lo==1 for Polarity, sets tempBit at start
 byte    tempBit    = 1;      //Reflects the required transition polarity
 byte    discards   = 0;      //how many leading "bits" need to be dumped, usually just a zero if anything eg discards=1
@@ -277,7 +279,7 @@ void loop() {
         else {
           if ((!firstZero) && (headerHits >= headerBits)) {
             firstZero = true;
-            digitalWrite(ledPin,1);
+            //digitalWrite(ledPin,1);
 
           }
           add(bitState);
@@ -535,7 +537,7 @@ void dumpRain() {
 
 void UV() {
   //maximum readings appear ot be about 130-140 units (not sure how they rate them)
-  intUV = int(((nyb(12)-7)*16)+nyb(11));
+  intUV = int((nyb(9)*16)+nyb(11));
 }
 void dumpUV() {
   Serial.print("UV Level ");
@@ -602,7 +604,8 @@ void dumpAnemom() {
 // Temperature 24.9799995422 degC Humidity 40.0000000000 % rel
 void thermom() {
   temperature = (double)((nyb(11) * 100) + (nyb(10) * 10) + nyb(9)) / 10; //accuracy to 0.1 degree seems unlikely
-  if (nyb(12) == 1) { //  Trigger a negative temperature
+  //The following line has been corrected by Darko in Italy, thank you, Grazie ragazzi!!!
+  if (nyb(12) == 8) { //  Trigger a negative temperature
     temperature = -1.0 * temperature;
   }
   humidity = (nyb(14) * 10) + nyb(13);
