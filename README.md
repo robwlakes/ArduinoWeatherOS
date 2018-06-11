@@ -10,9 +10,10 @@ The hardware
 
 The Arduino listens continually for the three WMR86 sensor's broadcasts (the UV Light sensor must be purchased seperately) and merges them every minute for an output of a CSV string.  There are three transmitters in the WMR86 package, Wind Direction+Wind Speed (average and gusts), Temperature+Humidity, and Rainfall (cumulative total and rate).  They each have different periods between transmission eg Wind every 14 Seconds, Temp/Hum and Rainfall at longer periods.  This does cause overlap of sensor transmissions and inevitable corruption of some packets, however the protocol does have a simple arithmetic checksum based on nybbles that helps eliminate most bad data.  Admittedly the chance of substitution errors causing bad data to go un-detected is much higher than if a higher bit CRC based on a polynomial process was used.  Range validation would be necessary (in the Python or Arduino) to check if the resulting readings were sensible to improve reliability.  This program reports every minute for all three sensors whether a good packet has been received within that minute or not, so the Python program can sum the good and bad packets each minute and report the relative numbers each week in an email.
 
-The wiring
+The Wiring: A generic prototyping shield was used.
+
 ![alt text](images/schematic.png?raw=true "Arduino Schematic")
-x
+
 #### Manchester Protocol
 
 The Ardunio algorithm to decode the Manchester protocol uses timed delays to sample the waveform from the 433MHz Rx and not interrupts and direct measurement of waveform transitions.  This has a number of implications.  The main one is that Arduino is continually sampling and analysing the incoming waveform.  As it is a dedicated processor in this application and has no other function, this is not a problem. The benefit is that it does simplify the reception and analysis of the waveforms.  The simple decoding strategy should also be worth studying by anyone else attempting to leverage other systems that use Manchester encoding. To that end a fairly lengthy explanation is offered below. 
